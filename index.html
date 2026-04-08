@@ -1,80 +1,135 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Cashier Collection System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    :root{
-      --bg:#f4f6f9; --card:#ffffff; --ink:#22324a; --muted:#6b7280; --line:#e5e7eb;
-      --primary:#1e3a5f; --success:#10b981; --warning:#f59e0b; --danger:#b02a37;
-    }
-    body { font-family: "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--ink); padding: 20px; }
-    .container { max-width: 1200px; margin: 0 auto; }
-    .card { background: var(--card); border:1px solid var(--line); border-radius: 16px; padding: 20px; box-shadow:0 4px 14px rgba(0,0,0,.05); margin-bottom: 18px; }
-    .app-title { font-size: 1.7rem; font-weight: 800; color: var(--primary); margin-bottom: 8px; }
-    .subtitle { color: var(--muted); margin-bottom: 16px; }
-    .topbar { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom: 18px; }
-    .user-pill { background:#f8fafc; border:1px solid var(--line); border-radius: 999px; padding: 10px 14px; font-weight: 700; color: var(--primary); }
-    .row { display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:14px; }
-    .row-3 { display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap:14px; }
-    .row-4 { display:grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap:14px; }
-    label { display:block; font-size:.9rem; color:#445; margin: 8px 0 6px; font-weight:600; }
-    input, select, textarea { width:100%; border:1px solid #d7dce3; background:#fbfcfe; border-radius:12px; padding: 12px 13px; font-size:15px; }
-    input:focus, select:focus, textarea:focus { outline:none; border-color:#9fb5d1; background:#fff; }
-    button { border:none; border-radius:12px; padding: 12px 16px; font-size:15px; font-weight: 800; cursor:pointer; }
-    .primary-btn { background: var(--primary); color:#fff; }
-    .secondary-btn { background:#e9eef6; color: var(--primary); }
-    .success-btn { background: var(--success); color:#fff; }
-    .danger-btn { background: var(--danger); color:#fff; }
-    .tabs { display:flex; gap:10px; flex-wrap:wrap; margin-bottom: 16px; }
-    .tab { background:#f4f7fb; color:var(--primary); border:1px solid var(--line); min-width: 140px; }
-    .tab.active { background: var(--primary); color: #fff; }
-    .hidden { display:none !important; }
-    .alert { display:none; padding: 12px 14px; border-radius: 12px; margin-bottom: 12px; font-weight:700; }
+    body { font-family: "Segoe UI", Roboto, sans-serif; background: #f4f6f9; padding: 24px; color: #2c3e50; }
+    .container { max-width: 1200px; margin: auto; }
+    .app-title { font-size: 1.6rem; font-weight: 700; color: #1e3a5f; margin-bottom: 18px; }
+    .card { background:#fff; border-radius:14px; padding:22px; margin-bottom:18px; box-shadow:0 4px 12px rgba(0,0,0,0.05); border:1px solid #e6e9ef; }
+    h3 { font-size: 1.1rem; margin-bottom: 14px; font-weight: 700; color: #1e3a5f; }
+    h4 { font-size: 1rem; margin: 15px 0 10px; color: #2c3e50; }
+    label { display:block; font-size:.85rem; color:#555; margin:8px 0 4px; }
+    input, select, textarea { width:100%; padding:12px; margin-bottom:12px; border:1px solid #dcdfe6; border-radius:10px; font-size:15px; background:#fafbfc; }
+    input:focus, select:focus, textarea:focus { outline:none; border-color:#1e3a5f; background:#fff; }
+    button { padding:12px 16px; border-radius:10px; border:none; font-weight:700; font-size:15px; cursor:pointer; transition:all .2s; }
+    button:active { transform: translateY(1px); }
+    button:disabled { opacity:.5; cursor:not-allowed; }
+    .primary-btn { background:#1e3a5f; color:#fff; }
+    .secondary-btn { background:#e9edf3; color:#1e3a5f; }
+    .success-btn { background:#10b981; color:#fff; }
+    .warning-btn { background:#f59e0b; color:#fff; }
+    .danger-btn { background:#b02a37; color:#fff; }
+    .row { display:grid; grid-template-columns: 1fr 1fr; gap:14px; }
+    .row-3 { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:14px; }
+    .row-4 { display:grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap:14px; }
+    .tabs { display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap; }
+    .tab { flex:1; min-width:120px; padding:12px; border-radius:10px; border:1px solid #dcdfe6; background:#f5f7fa; cursor:pointer; font-weight:800; text-align:center; }
+    .tab.active { background:#1e3a5f; color:white; border-color:#1e3a5f; }
+    .hidden { display:none; }
+    .alert { padding:12px 14px; border-radius:10px; margin:0 0 12px; display:none; font-weight:700; }
     .alert.show { display:block; }
-    .alert.success { background:#e8f8f1; color:#0f7d57; }
-    .alert.error { background:#fdecec; color:#a22b37; }
-    .alert.warning { background:#fff6db; color:#9a6a00; }
-    .stat-box { background:#f8fafc; border:1px solid var(--line); border-radius:14px; padding:18px; text-align:center; }
-    .stat-label { color:var(--muted); font-size:.9rem; margin-bottom:8px; }
-    .stat-value { font-size:1.55rem; font-weight:800; color:var(--primary); }
-    .stat-value.success { color:var(--success); }
-    .stat-value.warning { color:var(--warning); }
-    .section-title { font-size:1.1rem; font-weight:800; color: var(--primary); margin-bottom: 14px; }
-    .badge { display:inline-block; margin-left:10px; padding:4px 10px; border-radius:999px; background:#eef4ff; color:var(--primary); font-size:.78rem; font-weight:800; }
+    .alert.success { background:#e6f4ea; color:#1e7e34; }
+    .alert.error { background:#fdecea; color:#b02a37; }
+    .alert.info { background:#e7f1ff; color:#1e3a5f; }
+    .alert.warning { background:#fef3c7; color:#b45309; }
+    .stat-box { background:#f8fafc; padding:16px; border-radius:12px; text-align:center; border:1px solid #e6e9ef; position:relative; }
+    .stat-label { font-size:.85rem; color:#6c757d; margin-bottom:6px; }
+    .stat-value { font-size:1.4rem; font-weight:800; color:#1e3a5f; }
+    .stat-value-green { font-size:1.4rem; font-weight:800; color:#10b981; }
+    .stat-value-orange { font-size:1.4rem; font-weight:800; color:#f59e0b; }
+    .section-card { background:#fff; border-radius:14px; padding:20px; margin-bottom:20px; border-left:4px solid #10b981; box-shadow:0 2px 8px rgba(0,0,0,0.03); }
+    .badge { display:inline-block; padding:4px 10px; border-radius:20px; font-size:0.75rem; font-weight:700; margin-left:10px; background:#fef3c7; color:#b45309; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px; }
+    .user-pill { background:#f5f7fa; border:1px solid #dcdfe6; padding:8px 12px; border-radius:999px; font-weight:800; color:#1e3a5f; position:relative; }
+    #lastLoginBadge {
+      position: absolute;
+      bottom: -20px;
+      left: 0;
+      right: 0;
+      font-size: 10px;
+      color: #666;
+      white-space: nowrap;
+      background: #f0f0f0;
+      padding: 2px 8px;
+      border-radius: 12px;
+      display: none;
+    }
+    .divider { height:1px; background:#eef1f5; margin:20px 0; }
     .overlay { position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:9999; padding:16px; }
     .overlay.show { display:flex; }
-    .overlay-card { background:#fff; border-radius:16px; border:1px solid var(--line); padding:22px; width:min(420px, 92vw); text-align:center; }
-    .spinner { width:42px; height:42px; border:4px solid #e5e7eb; border-top-color:var(--primary); border-radius:50%; margin: 0 auto 12px; animation: spin .9s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    table { width:100%; border-collapse: collapse; }
-    th, td { padding: 10px; border-bottom:1px solid #eef2f7; text-align:left; font-size:.92rem; }
-    th { position:sticky; top:0; background: var(--primary); color:#fff; }
-    #searchWrap { max-height:420px; overflow:auto; border:1px solid var(--line); border-radius:12px; }
-    .login-card { max-width:480px; margin: 40px auto 0; }
-    .muted { color: var(--muted); }
-    @media (max-width: 860px){
-      .row, .row-3, .row-4 { grid-template-columns: 1fr; }
-      body { padding: 14px; }
+    .overlay-card { background:#fff; border-radius:14px; padding:18px; width:min(420px, 92vw); border:1px solid #e6e9ef; box-shadow:0 10px 25px rgba(0,0,0,.18); text-align:center; }
+    .spinner { width:42px; height:42px; border-radius:50%; border:4px solid #e5e7eb; border-top-color:#1e3a5f; margin:0 auto 12px; animation:spin .9s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+
+    .reason-row { display:flex; gap:10px; align-items:center; background:#fff; border:1px solid #e6e9ef; padding:10px; border-radius:10px; margin-bottom:8px; }
+    .reason-row .reasonType { flex:2; }
+    .reason-row .reasonOther { flex:3; display:none; }
+    .reason-row .reasonAmount { width:140px; }
+    .reason-row .removeReasonBtn { padding:10px; }
+
+    .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:10000; align-items:center; justify-content:center; }
+    .modal.show { display:flex; }
+    .modal-content { background:#fff; border-radius:14px; padding:24px; width:min(400px, 90%); max-height:90vh; overflow-y:auto; }
+    .modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; }
+    .modal-header h3 { margin:0; }
+    .close-modal { font-size:1.5rem; cursor:pointer; color:#6c757d; }
+    .close-modal:hover { color:#1e3a5f; }
+
+    #searchResults { margin-top:20px; max-height:400px; overflow-y:auto; border:1px solid #e6e9ef; border-radius:10px; }
+    #searchResults table { width:100%; border-collapse: collapse; }
+    #searchResults th { background:#1e3a5f; color:white; padding:10px; position:sticky; top:0; }
+    #searchResults td { padding:8px; border-bottom:1px solid #eef1f5; }
+    #searchSummary { margin-top:10px; text-align:right; font-weight:800; padding:10px; background:#f8fafc; border-radius:10px; }
+
+    @media (max-width: 640px) {
+      body{padding:14px;}
+      .row,.row-3,.row-4{grid-template-columns:1fr;}
+      .tabs{flex-direction:column;}
+      .reason-row{flex-wrap:wrap;}
+      .reason-row .reasonAmount{width:100%;}
+      .topbar{flex-direction:column; align-items:stretch;}
+      #lastLoginBadge { position: static; margin-top: 5px; display: block; }
     }
   </style>
 </head>
+
 <body>
   <div id="loadingOverlay" class="overlay">
     <div class="overlay-card">
       <div class="spinner"></div>
-      <div style="font-weight:800; color:#1e3a5f; margin-bottom:4px;" id="loadingTitle">Please wait…</div>
-      <div class="muted" id="loadingMsg">Processing</div>
+      <div class="overlay-title" id="loadingTitle" style="font-weight:800; color:#1e3a5f; margin-bottom:4px;">Please wait…</div>
+      <div class="overlay-msg" id="loadingMsg" style="color:#6c757d; font-weight:700;">Processing</div>
+    </div>
+  </div>
+
+  <div id="passwordChangeModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>🔐 Change Your Password</h3>
+        <span class="close-modal" onclick="closePasswordModal()">&times;</span>
+      </div>
+      <p style="margin-bottom:15px; color:#6c757d;">This is your first login. Please set a new password.</p>
+      <label>New Password</label>
+      <input type="password" id="newPassword" placeholder="Enter new password">
+      <label>Confirm New Password</label>
+      <input type="password" id="confirmPassword" placeholder="Confirm new password">
+      <div class="row" style="margin-top:15px;">
+        <button class="secondary-btn" onclick="closePasswordModal()">Cancel</button>
+        <button class="primary-btn" id="saveNewPasswordBtn">Save Password</button>
+      </div>
     </div>
   </div>
 
   <div class="container">
-    <div id="loginScreen" class="card login-card">
+    <div id="loginScreen" class="card">
       <div class="app-title">Cashier Collection System</div>
-      <div class="subtitle">Login to continue</div>
       <div id="loginAlert" class="alert"></div>
 
       <label>Username</label>
@@ -83,40 +138,38 @@
       <label>Password</label>
       <input type="password" id="password" placeholder="Password">
 
-      <div class="row" style="margin-top:12px;">
-        <button class="primary-btn" id="loginBtn">Login</button>
-        <button class="secondary-btn" id="demoFillBtn" type="button">Fill Last Username</button>
-      </div>
+      <button class="primary-btn" id="loginBtn">Login</button>
     </div>
 
     <div id="mainScreen" class="hidden">
       <div class="topbar">
-        <div>
-          <div class="app-title">Cashier Collection System</div>
-          <div class="subtitle">Cash count, deposits, dashboard, and search</div>
-        </div>
-        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-          <div class="user-pill" id="userDisplay">—</div>
+        <div class="app-title">Cashier Collection</div>
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+          <div class="user-pill">
+            <span id="userDisplay">—</span>
+            <span id="lastLoginBadge"></span>
+          </div>
           <button class="secondary-btn" id="logoutBtn">Logout</button>
         </div>
       </div>
 
       <div id="mainAlert" class="alert"></div>
 
-      <div class="card">
-        <div class="row">
-          <div>
-            <label>Working Date</label>
-            <input type="date" id="workDate">
-          </div>
-          <div style="display:flex; align-items:end;">
-            <button class="secondary-btn" id="refreshBtn" style="width:100%;">Refresh Dashboard</button>
-          </div>
+      <div class="row">
+        <div>
+          <label>Working Date</label>
+          <input type="date" id="workDate">
+        </div>
+        <div style="display:flex; gap:10px; align-items:end;">
+          <button class="secondary-btn" id="refreshBtn" style="width:100%;">Refresh Dashboard</button>
         </div>
       </div>
 
-      <div class="card">
-        <div class="section-title">Dashboard <span class="badge">Cashier</span></div>
+      <div class="section-card">
+        <h3 style="display:flex; align-items:center; margin-bottom:15px;">
+          📊 CASH & SALES
+          <span class="badge">Mauzo na Tofauti</span>
+        </h3>
         <div class="row-4">
           <div class="stat-box">
             <div class="stat-label">Hela Iliyobaki Ofisini</div>
@@ -124,7 +177,7 @@
           </div>
           <div class="stat-box">
             <div class="stat-label">Mauzo Yaliyopo (Cash Counted)</div>
-            <div class="stat-value success" id="dashCounted">TZS 0</div>
+            <div class="stat-value-green" id="dashCounted">TZS 0</div>
           </div>
           <div class="stat-box">
             <div class="stat-label">Mauzo ya Mfumo (System)</div>
@@ -132,66 +185,69 @@
           </div>
           <div class="stat-box">
             <div class="stat-label">Tofauti</div>
-            <div class="stat-value warning" id="dashDiff">TZS 0</div>
+            <div class="stat-value-orange" id="dashDiff">TZS 0</div>
           </div>
         </div>
-        <div class="row" style="margin-top:14px;">
+        <div class="row" style="margin-top:10px;">
           <div class="stat-box">
             <div class="stat-label">Hela ya Kwenda Bank</div>
             <div class="stat-value" id="dashPending">TZS 0</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-label">Summary</div>
-            <div class="muted">System hii imebaki na cash collection, bank deposit, login, na search.</div>
           </div>
         </div>
       </div>
 
       <div class="tabs">
-        <button id="tabCashCount" class="tab active">1. Cash Count</button>
+        <button id="tabCashCount" class="tab active">1. Mauzo vs Cash</button>
         <button id="tabDeposit" class="tab">2. Bank Deposit</button>
-        <button id="tabSearch" class="tab">3. Tafuta</button>
+        <button id="tabSearch" class="tab">3. 🔍 Tafuta</button>
       </div>
 
       <div id="cashCountTab" class="card">
-        <div class="section-title">Mauzo ya Mfumo vs Cash Iliyohesabiwa</div>
+        <h3>📊 Mauzo ya Mfumo vs Cash Iliyohesabiwa</h3>
+
         <div class="row">
           <div>
-            <label>Mauzo ya Mfumo (TZS)</label>
+            <label for="systemSalesAmount">Mauzo ya Mfumo (TZS)</label>
             <input type="text" id="systemSalesAmount" placeholder="Weka mauzo ya mfumo">
           </div>
           <div>
-            <label>Cash Iliyohesabiwa (TZS)</label>
+            <label for="cashCountAmount">Cash Iliyohesabiwa (TZS)</label>
             <input type="text" id="cashCountAmount" placeholder="Weka cash iliyohesabiwa">
           </div>
         </div>
 
-        <div class="card" style="background:#f8fafc; margin-top:12px;">
+        <div class="stat-box" style="margin-top:10px;">
           <div class="stat-label">Tofauti (Cash - Mauzo ya Mfumo)</div>
           <div class="stat-value" id="cashVsSalesDiff">TZS 0</div>
-          <div class="muted" id="shortageRemainingText" style="margin-top:8px;"></div>
+          <div style="margin-top:8px; font-weight:800;" id="shortageRemainingText"></div>
         </div>
 
-        <div id="reasonsBox" class="card hidden" style="background:#fcfcfd;">
-          <div class="section-title">Sababu za Upungufu</div>
+        <div id="reasonsBox" class="card hidden" style="margin-top:14px; padding:15px;">
+          <h4>Eleza Sababu za Upungufu</h4>
           <div id="reasonsList"></div>
-          <button class="secondary-btn" id="addReasonBtn" style="margin-top:10px; width:100%;">+ Ongeza Sababu</button>
-          <div class="muted" style="margin-top:10px;">Ukichagua Other lazima uandike sababu halisi.</div>
+          <button class="secondary-btn" id="addReasonBtn" style="width:100%; margin-top:10px;">+ Ongeza Sababu</button>
+          <div class="divider"></div>
+          <div class="stat-box">
+            <div class="stat-label">Kumbuka</div>
+            <div style="font-weight:800; color:#1e3a5f;">
+              Ukichagua <b>Other</b> lazima uandike sababu halisi.
+            </div>
+          </div>
         </div>
 
-        <label>Maelezo (hiari)</label>
+        <label for="cashCountNote">Maelezo (hiari)</label>
         <input type="text" id="cashCountNote" placeholder="Optional note">
 
-        <button class="primary-btn" id="saveCashAndSalesBtn" style="margin-top:12px;">Save Mauzo + Cash</button>
+        <button class="primary-btn" id="saveCashAndSalesBtn">Save Mauzo + Cash</button>
 
         <template id="reasonTemplate">
-          <div class="reason-row" style="display:grid; grid-template-columns:2fr 2fr 1.2fr auto; gap:10px; margin-bottom:8px;">
+          <div class="reason-row" data-reason-row="1">
             <select class="reasonType">
               <option value="">Chagua Sababu</option>
               <option value="Lipa Mpesa">Lipa Mpesa</option>
               <option value="Other">Other</option>
             </select>
-            <input type="text" class="reasonOther hidden" placeholder="Andika sababu (ikiwa Other)">
+            <input type="text" class="reasonOther" placeholder="Andika sababu (ikiwa Other)">
             <input type="text" class="reasonAmount" placeholder="Kiasi">
             <button type="button" class="secondary-btn removeReasonBtn">✕</button>
           </div>
@@ -199,41 +255,51 @@
       </div>
 
       <div id="depositTab" class="card hidden">
-        <div class="section-title">Bank Deposit</div>
+        <h3>🏦 Bank Deposit</h3>
+
         <div class="row">
           <div>
-            <label>Deposit from Office Cash (TZS)</label>
+            <label for="depositOffice">Deposit from Office Cash (TZS)</label>
             <input type="text" id="depositOffice" placeholder="0">
           </div>
           <div>
-            <label>Cash aliyopewa Director (TZS)</label>
+            <label for="depositDirector">Cash aliyopewa Director(TZS)</label>
             <input type="text" id="depositDirector" placeholder="0">
           </div>
         </div>
 
-        <label>Maelezo</label>
+        <label for="depositNote">Maelezo</label>
         <input type="text" id="depositNote" placeholder="e.g., CRDB deposit slip #...">
 
-        <button class="primary-btn" id="saveDepositBtn" style="margin-top:12px;">Save Deposit</button>
+        <button class="primary-btn" id="saveDepositBtn">Save Deposit</button>
+
+        <div class="divider"></div>
+        <div class="stat-box">
+          <div class="stat-label">Tip</div>
+          <div style="font-weight:800; color:#1e3a5f;">
+            Jaza deposits zote na kama hela amepewa Director mkononi weka kwenye maelezo
+          </div>
+        </div>
       </div>
 
       <div id="searchTab" class="card hidden">
-        <div class="section-title">Tafuta Transactions</div>
+        <h3>🔍 Tafuta Transactions</h3>
+
         <div class="row-3">
           <div>
-            <label>Tarehe Kuanzia</label>
+            <label for="searchDateFrom">Tarehe Kuanzia</label>
             <input type="date" id="searchDateFrom">
           </div>
           <div>
-            <label>Tarehe Mpaka</label>
+            <label for="searchDateTo">Tarehe Mpaka</label>
             <input type="date" id="searchDateTo">
           </div>
           <div>
-            <label>Aina</label>
+            <label for="searchType">Aina</label>
             <select id="searchType">
               <option value="">Zote</option>
               <option value="CASH_COUNT">Cash Count</option>
-              <option value="CASH_REASON">Cash Reasons</option>
+              <option value="CASH_REASON">Sababu za Upungufu</option>
               <option value="DEPOSIT">Deposit</option>
             </select>
           </div>
@@ -241,7 +307,7 @@
 
         <div class="row-3">
           <div>
-            <label>Chanzo</label>
+            <label for="searchSource">Chanzo</label>
             <select id="searchSource">
               <option value="">Zote</option>
               <option value="OFFICE">Office</option>
@@ -251,19 +317,19 @@
             </select>
           </div>
           <div>
-            <label>Category</label>
-            <input type="text" id="searchCategoryText" placeholder="e.g. Deposit, System Sales">
+            <label for="searchCategory">Category</label>
+            <input type="text" id="searchCategory" placeholder="e.g. Office Deposit">
           </div>
-          <div style="display:flex; align-items:end;">
-            <button class="primary-btn" id="searchBtn" style="width:100%;">Tafuta</button>
+          <div style="display:flex; align-items:flex-end;">
+            <button class="primary-btn" id="searchBtn" style="width:100%;">🔍 Tafuta</button>
           </div>
         </div>
 
-        <div class="row" style="margin-top:12px;">
-          <button class="secondary-btn" id="exportSearchBtn" style="width:100%;">Export Results</button>
+        <div class="row">
+          <button class="secondary-btn" id="exportSearchBtn" style="width:100%;">📥 Export Results</button>
         </div>
 
-        <div id="searchWrap" style="margin-top:14px;">
+        <div id="searchResults">
           <table>
             <thead>
               <tr>
@@ -277,377 +343,447 @@
               </tr>
             </thead>
             <tbody id="searchResultsBody">
-              <tr><td colspan="7" style="text-align:center; padding:18px;">Bonyeza "Tafuta" kuona matokeo</td></tr>
+              <tr><td colspan="7" style="text-align:center; padding:20px;">Bonyeza "Tafuta" kuona matokeo</td></tr>
             </tbody>
           </table>
         </div>
-        <div id="searchSummary" style="margin-top:10px; font-weight:800; text-align:right;">Jumla: TZS 0</div>
+
+        <div id="searchSummary">
+          Jumla: TZS 0
+        </div>
       </div>
     </div>
   </div>
 
-<script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzS65VR2IOqbcYwNUjtQnrwutJsPaV3Z1mskYYyuC87IAX1IZeM0mssYRiFwLGaTOOx/exec";
-const APP_MODE = "CASHIER";
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzS65VR2IOqbcYwNUjtQnrwutJsPaV3Z1mskYYyuC87IAX1IZeM0mssYRiFwLGaTOOx/exec";
 
-let currentUser = null;
-let sessionToken = null;
-let dashboardData = {};
+    let currentUser = null;
+    let sessionToken = null;
+    let lastLoginTime = null;
 
-function $(id){ return document.getElementById(id); }
-function setOverlay(show, title='Please wait…', msg='Processing…'){
-  $('loadingTitle').textContent = title;
-  $('loadingMsg').textContent = msg;
-  $('loadingOverlay').classList.toggle('show', !!show);
-}
-function showAlert(msg, type='success', target='main'){
-  const el = target === 'login' ? $('loginAlert') : $('mainAlert');
-  el.className = `alert show ${type}`;
-  el.textContent = msg;
-  clearTimeout(el._t);
-  el._t = setTimeout(() => el.classList.remove('show'), 4500);
-}
-function todayISO(){
-  const d = new Date();
-  const mm = String(d.getMonth()+1).padStart(2,'0');
-  const dd = String(d.getDate()).padStart(2,'0');
-  return `${d.getFullYear()}-${mm}-${dd}`;
-}
-function formatNumber(n){
-  return Number(n || 0).toLocaleString('en-US');
-}
-function parseMoney(v){
-  return Number(String(v || '').replace(/[^\d.-]/g,'') || 0);
-}
-function fmtTZS(n){ return `TZS ${formatNumber(n)}`; }
-function setMoneyInputFormatting(el){
-  el.addEventListener('input', () => {
-    const caret = el.selectionStart;
-    const raw = parseMoney(el.value);
-    el.value = raw ? formatNumber(raw) : '';
-    try { el.setSelectionRange(caret, caret); } catch(e) {}
-  });
-}
-function makeRef(){
-  const rand = Math.random().toString(36).slice(2, 10);
-  return `${currentUser?.username || 'user'}-${Date.now()}-${rand}`;
-}
+    function setOverlay(show, title='Please wait…', msg='Processing…') {
+      document.getElementById('loadingTitle').textContent = title;
+      document.getElementById('loadingMsg').textContent = msg;
+      document.getElementById('loadingOverlay').classList.toggle('show', !!show);
+    }
 
-async function apiCall(action, payload = {}, auth = true, title='Please wait…', msg='Processing…'){
-  setOverlay(true, title, msg);
-  try{
-    const res = await fetch(SCRIPT_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({
-        action,
-        token: auth ? sessionToken : '',
-        ...payload
-      })
-    });
-    const data = await res.json();
-    if (!data.ok) throw new Error(data.error || 'Request failed');
-    return data;
-  } finally {
-    setOverlay(false);
-  }
-}
+    function showAlert(msg, type, target='main') {
+      const el = (target === 'login') ? document.getElementById('loginAlert') : document.getElementById('mainAlert');
+      el.className = `alert show ${type}`;
+      el.textContent = msg;
+      clearTimeout(el._timer);
+      el._timer = setTimeout(() => el.classList.remove('show'), 4000);
+    }
 
-function filterCashierDashboard(d){
-  return {
-    officeCash: d.officeCash ?? d.office ?? 0,
-    countedCash: d.countedCash ?? d.cashCounted ?? d.counted ?? 0,
-    systemSales: d.systemSales ?? d.salesSystem ?? 0,
-    difference: d.difference ?? d.diff ?? 0,
-    pendingBank: d.pendingBank ?? d.bankPending ?? d.pending ?? 0
-  };
-}
+    function formatNumber(v) {
+      return (Number(v) || 0).toLocaleString();
+    }
 
-function renderDashboard(d = {}){
-  const x = filterCashierDashboard(d);
-  dashboardData = x;
-  $('dashOffice').textContent = fmtTZS(x.officeCash);
-  $('dashCounted').textContent = fmtTZS(x.countedCash);
-  $('dashSystemSales').textContent = fmtTZS(x.systemSales);
-  $('dashDiff').textContent = fmtTZS(x.difference);
-  $('dashPending').textContent = fmtTZS(x.pendingBank);
-}
+    function parseMoney(v) {
+      return Number(String(v || '').replace(/[^\d.-]/g, '')) || 0;
+    }
 
-function setActiveTab(tab){
-  ['CashCount','Deposit','Search'].forEach(t => {
-    $(`tab${t}`).classList.toggle('active', t === tab);
-    $(`${t.charAt(0).toLowerCase()+t.slice(1)}Tab`).classList.toggle('hidden', t !== tab);
-  });
-}
+    function setMoneyInputFormatting(id) {
+      const el = document.getElementById(id);
+      el.addEventListener('input', () => {
+        const n = parseMoney(el.value);
+        el.value = n ? formatNumber(n) : '';
+        if (id === 'systemSalesAmount' || id === 'cashCountAmount') updateCashDiffPreview();
+      });
+    }
 
-function calcDiffUI(){
-  const system = parseMoney($('systemSalesAmount').value);
-  const counted = parseMoney($('cashCountAmount').value);
-  const diff = counted - system;
-  $('cashVsSalesDiff').textContent = fmtTZS(diff);
-  $('shortageRemainingText').textContent =
-    diff < 0 ? `Upungufu: TZS ${formatNumber(Math.abs(diff))}` :
-    diff > 0 ? `Ziada: TZS ${formatNumber(diff)}` : 'Hakuna tofauti';
+    async function apiCall(action, payload={}, showLoader=true, title='Please wait…', msg='Processing…') {
+      if (showLoader) setOverlay(true, title, msg);
+      try {
+        const body = new URLSearchParams();
+        body.append('action', action);
 
-  $('reasonsBox').classList.toggle('hidden', diff >= 0);
-}
-
-function addReasonRow(type='', other='', amount=''){
-  const node = $('reasonTemplate').content.firstElementChild.cloneNode(true);
-  const typeEl = node.querySelector('.reasonType');
-  const otherEl = node.querySelector('.reasonOther');
-  const amountEl = node.querySelector('.reasonAmount');
-  const removeBtn = node.querySelector('.removeReasonBtn');
-
-  typeEl.value = type;
-  otherEl.value = other;
-  amountEl.value = amount ? formatNumber(amount) : '';
-  if (type === 'Other') otherEl.classList.remove('hidden');
-
-  typeEl.addEventListener('change', () => {
-    otherEl.classList.toggle('hidden', typeEl.value !== 'Other');
-    if (typeEl.value !== 'Other') otherEl.value = '';
-  });
-  amountEl.addEventListener('input', () => {
-    const val = parseMoney(amountEl.value);
-    amountEl.value = val ? formatNumber(val) : '';
-  });
-  removeBtn.addEventListener('click', () => node.remove());
-
-  $('reasonsList').appendChild(node);
-}
-
-async function loadInit(date){
-  const data = await apiCall('getInit', { date, system: APP_MODE }, true, 'Loading…', 'Fetching dashboard');
-  renderDashboard(data.dashboard || {});
-}
-
-async function login(){
-  const username = $('username').value.trim().toLowerCase();
-  const password = $('password').value;
-  if (!username || !password) return showAlert('Weka username na password', 'error', 'login');
-
-  try{
-    const data = await apiCall('login', { username, password, system: APP_MODE }, false, 'Logging in…', 'Checking credentials');
-    sessionToken = data.token;
-    currentUser = data.user || { username, name: username, role: 'Cashier' };
-    localStorage.setItem('cashier_username', username);
-    $('userDisplay').textContent = `${currentUser.name || currentUser.username} (${currentUser.role || 'User'})`;
-    $('loginScreen').classList.add('hidden');
-    $('mainScreen').classList.remove('hidden');
-    $('workDate').value = $('workDate').value || todayISO();
-    await loadInit($('workDate').value);
-    showAlert(`Welcome ${currentUser.name || currentUser.username}!`, 'success');
-  } catch(e){
-    showAlert(e.message || 'Invalid username or password', 'error', 'login');
-  }
-}
-
-function logout(){
-  sessionToken = null;
-  currentUser = null;
-  location.reload();
-}
-
-async function refreshDashboardOnly(){
-  try{
-    const date = $('workDate').value;
-    const data = await apiCall('getDashboard', { date, system: APP_MODE }, true, 'Refreshing…', 'Updating dashboard');
-    renderDashboard(data.dashboard || {});
-    showAlert('Dashboard updated', 'success');
-  } catch(e){
-    showAlert(e.message, 'error');
-  }
-}
-
-async function addTx({date, type, category, amount, source, note}){
-  return await apiCall('addTx', {
-    date, type, category, amount: String(amount), source, note,
-    cashier: currentUser?.username || 'Unknown',
-    ref: makeRef(),
-    system: APP_MODE
-  }, true, 'Saving…', 'Recording transaction');
-}
-
-async function saveCashAndSales(){
-  const btn = $('saveCashAndSalesBtn');
-  btn.disabled = true;
-  try{
-    const date = $('workDate').value;
-    const systemAmount = parseMoney($('systemSalesAmount').value);
-    const cashAmount = parseMoney($('cashCountAmount').value);
-    const note = $('cashCountNote').value.trim();
-
-    if (!date) return showAlert('Chagua tarehe', 'error');
-    if (systemAmount <= 0 && cashAmount <= 0) return showAlert('Weka kiasi sahihi', 'error');
-
-    await addTx({
-      date, type: 'CASH_COUNT', category: 'System Sales vs Cash Count',
-      amount: cashAmount, source: 'SYSTEM',
-      note: JSON.stringify({ systemSales: systemAmount, countedCash: cashAmount, note })
-    });
-
-    const diff = cashAmount - systemAmount;
-    if (diff < 0){
-      const rows = [...$('reasonsList').children];
-      for (const row of rows){
-        const type = row.querySelector('.reasonType').value;
-        const other = row.querySelector('.reasonOther').value.trim();
-        const amount = parseMoney(row.querySelector('.reasonAmount').value);
-        if (!type || amount <= 0) continue;
-        if (type === 'Other' && !other) {
-          return showAlert('Ukichagua Other andika sababu', 'error');
+        if (sessionToken && action !== 'login') {
+          body.append('token', sessionToken);
         }
-        await addTx({
-          date, type:'CASH_REASON', category: type === 'Other' ? other : type,
-          amount, source:'REASON', note:'Shortage explanation'
+
+        Object.keys(payload).forEach(k => {
+          if (payload[k] !== undefined && payload[k] !== null) {
+            body.append(k, payload[k]);
+          }
         });
+
+        const res = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+          body: body.toString()
+        });
+
+        const data = await res.json();
+
+        if (data.needLogin) {
+          showAlert('Session expired. Please login again.', 'warning');
+          logout();
+          return;
+        }
+
+        if (!data.success) {
+          throw new Error(data.error || 'Request failed');
+        }
+
+        return data;
+      } finally {
+        if (showLoader) setOverlay(false);
       }
     }
 
-    $('systemSalesAmount').value = '';
-    $('cashCountAmount').value = '';
-    $('cashCountNote').value = '';
-    $('reasonsList').innerHTML = '';
-    $('reasonsBox').classList.add('hidden');
-    calcDiffUI();
-    await refreshDashboardOnly();
-    showAlert('Mauzo na cash vimehifadhiwa', 'success');
-  } catch(e){
-    showAlert(e.message, 'error');
-  } finally {
-    btn.disabled = false;
-  }
-}
-
-async function saveDeposit(){
-  const btn = $('saveDepositBtn');
-  btn.disabled = true;
-  try{
-    const date = $('workDate').value;
-    const office = parseMoney($('depositOffice').value);
-    const director = parseMoney($('depositDirector').value);
-    const note = $('depositNote').value.trim();
-
-    if (!date) return showAlert('Chagua tarehe', 'error');
-    if (office <= 0 && director <= 0) return showAlert('Weka angalau kiasi kimoja', 'error');
-
-    if (office > 0){
-      await addTx({ date, type:'DEPOSIT', category:'Office Deposit', amount:office, source:'OFFICE', note });
-    }
-    if (director > 0){
-      await addTx({ date, type:'DEPOSIT', category:'Director Deposit', amount:director, source:'DIRECTOR', note });
+    function setActiveTab(tab) {
+      const tabs = ['CashCount','Deposit','Search'];
+      tabs.forEach(t => {
+        const el = document.getElementById(`tab${t}`);
+        if (el) el.classList.toggle('active', t === tab);
+      });
+      document.getElementById('cashCountTab').classList.toggle('hidden', tab !== 'CashCount');
+      document.getElementById('depositTab').classList.toggle('hidden', tab !== 'Deposit');
+      document.getElementById('searchTab').classList.toggle('hidden', tab !== 'Search');
     }
 
-    $('depositOffice').value = '';
-    $('depositDirector').value = '';
-    $('depositNote').value = '';
-    await refreshDashboardOnly();
-    showAlert('Deposit imehifadhiwa', 'success');
-  } catch(e){
-    showAlert(e.message, 'error');
-  } finally {
-    btn.disabled = false;
-  }
-}
+    function renderDashboard(dashboard) {
+      document.getElementById('dashOffice').textContent = 'TZS ' + formatNumber(dashboard.officeExpected || 0);
+      document.getElementById('dashCounted').textContent = 'TZS ' + formatNumber(dashboard.cashCounted || 0);
+      document.getElementById('dashSystemSales').textContent = 'TZS ' + formatNumber(dashboard.systemSales || 0);
+      document.getElementById('dashDiff').textContent = 'TZS ' + formatNumber(dashboard.difference || 0);
+      document.getElementById('dashPending').textContent = 'TZS ' + formatNumber(dashboard.pendingDeposit || 0);
+    }
 
-function normalizeRows(data){
-  return Array.isArray(data) ? data : (data.rows || data.transactions || []);
-}
+    async function loadInit(date) {
+      const data = await apiCall('getInit', { date }, true, 'Loading…', 'Preparing dashboard');
+      renderDashboard(data.dashboard || {});
+    }
 
-function filterCashierSearchRows(rows){
-  const allowed = new Set(['CASH_COUNT', 'CASH_REASON', 'DEPOSIT']);
-  return rows.filter(r => allowed.has(r.type));
-}
+    async function refreshDashboard() {
+      const date = document.getElementById('workDate').value;
+      const data = await apiCall('getDashboard', { date }, true, 'Refreshing…', 'Updating dashboard');
+      renderDashboard(data.dashboard || {});
+      showAlert('Dashboard refreshed', 'success');
+    }
 
-function renderSearchResults(rows){
-  const tbody = $('searchResultsBody');
-  const summary = $('searchSummary');
-  if (!rows.length){
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:18px;">Hakuna matokeo</td></tr>';
-    summary.textContent = 'Jumla: TZS 0';
-    return;
-  }
-  let total = 0;
-  tbody.innerHTML = rows.map(t => {
-    total += Number(t.amount || 0);
-    return `
-      <tr>
-        <td>${t.date || '-'}</td>
-        <td>${t.type || '-'}</td>
-        <td>${t.category || '-'}</td>
-        <td style="text-align:right;">TZS ${formatNumber(t.amount)}</td>
-        <td>${t.source || '-'}</td>
-        <td>${(t.note || '-').toString().replace(/</g,'&lt;')}</td>
-        <td>${t.cashier || '-'}</td>
-      </tr>
-    `;
-  }).join('');
-  summary.textContent = `Jumla: TZS ${formatNumber(total)}`;
-}
+    function openPasswordModal() {
+      document.getElementById('passwordChangeModal').classList.add('show');
+    }
 
-async function searchTransactions(){
-  try{
-    const payload = {
-      dateFrom: $('searchDateFrom').value,
-      dateTo: $('searchDateTo').value,
-      type: $('searchType').value,
-      source: $('searchSource').value,
-      category: $('searchCategoryText').value.trim(),
-      system: APP_MODE
-    };
-    const data = await apiCall('searchTransactions', payload, true, 'Searching…', 'Fetching transactions');
-    const rows = filterCashierSearchRows(normalizeRows(data));
-    renderSearchResults(rows);
-    showAlert('Search completed', 'success');
-  } catch(e){
-    showAlert(e.message, 'error');
-  }
-}
+    function closePasswordModal() {
+      document.getElementById('passwordChangeModal').classList.remove('show');
+    }
 
-function exportSearchResults(){
-  const rows = [...document.querySelectorAll('#searchResultsBody tr')];
-  if (!rows.length || rows[0].children.length === 1){
-    return showAlert('Hakuna data ya kuexport', 'warning');
-  }
-  let csv = 'Tarehe,Aina,Category,Kiasi,Chanzo,Maelezo,Cashier\n';
-  rows.forEach(row => {
-    const cols = [...row.querySelectorAll('td')].map(td => `"${td.textContent.replace(/"/g,'""')}"`);
-    csv += cols.join(',') + '\n';
-  });
-  const blob = new Blob([csv], {type:'text/csv'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `cashier_search_${todayISO()}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
+    async function changePassword() {
+      const newPassword = document.getElementById('newPassword').value.trim();
+      const confirmPassword = document.getElementById('confirmPassword').value.trim();
 
-document.addEventListener('DOMContentLoaded', () => {
-  $('workDate').value = todayISO();
-  $('searchDateFrom').value = todayISO();
-  $('searchDateTo').value = todayISO();
+      if (!newPassword || newPassword.length < 6) {
+        return showAlert('Password must be at least 6 characters', 'error', 'login');
+      }
+      if (newPassword !== confirmPassword) {
+        return showAlert('Passwords do not match', 'error', 'login');
+      }
 
-  ['systemSalesAmount','cashCountAmount','depositOffice','depositDirector'].forEach(id => setMoneyInputFormatting($(id)));
+      try {
+        await apiCall('changePassword', { newPassword }, true, 'Saving…', 'Changing password');
+        closePasswordModal();
+        document.getElementById('mainScreen').classList.remove('hidden');
+        const date = document.getElementById('workDate').value;
+        await loadInit(date);
+        showAlert('Password changed successfully', 'success');
+      } catch (e) {
+        showAlert(e.message, 'error', 'login');
+      }
+    }
 
-  $('loginBtn').addEventListener('click', login);
-  $('demoFillBtn').addEventListener('click', () => $('username').value = localStorage.getItem('cashier_username') || '');
-  $('logoutBtn').addEventListener('click', logout);
-  $('refreshBtn').addEventListener('click', refreshDashboardOnly);
+    async function login() {
+      const u = document.getElementById('username').value.trim().toLowerCase();
+      const p = document.getElementById('password').value;
 
-  $('tabCashCount').addEventListener('click', () => setActiveTab('CashCount'));
-  $('tabDeposit').addEventListener('click', () => setActiveTab('Deposit'));
-  $('tabSearch').addEventListener('click', () => setActiveTab('Search'));
+      try {
+        const data = await apiCall('login', { username: u, password: p }, true);
+        sessionToken = data.token;
+        currentUser = data.user;
+        lastLoginTime = new Date();
 
-  $('systemSalesAmount').addEventListener('input', calcDiffUI);
-  $('cashCountAmount').addEventListener('input', calcDiffUI);
-  $('addReasonBtn').addEventListener('click', () => addReasonRow());
-  $('saveCashAndSalesBtn').addEventListener('click', saveCashAndSales);
-  $('saveDepositBtn').addEventListener('click', saveDeposit);
-  $('searchBtn').addEventListener('click', searchTransactions);
-  $('exportSearchBtn').addEventListener('click', exportSearchResults);
-});
-</script>
+        const lastLoginKey = `lastLogin_${currentUser.username}`;
+        const previousLogin = localStorage.getItem(lastLoginKey);
+
+        if (previousLogin) {
+          const lastDate = new Date(previousLogin);
+          const now = new Date();
+          const hoursAgo = Math.round((now - lastDate) / (1000 * 60 * 60));
+          const badge = document.getElementById('lastLoginBadge');
+          if (hoursAgo < 24) {
+            badge.textContent = `Last login: ${hoursAgo} hour${hoursAgo > 1 ? 's' : ''} ago`;
+          } else {
+            const daysAgo = Math.round(hoursAgo / 24);
+            badge.textContent = `Last login: ${daysAgo} day${daysAgo > 1 ? 's' : ''} ago`;
+          }
+          badge.style.display = 'block';
+        }
+
+        localStorage.setItem(lastLoginKey, new Date().toISOString());
+        document.getElementById('userDisplay').textContent = `${data.user.name} (${data.user.role})`;
+
+        if (data.user.firstLogin) {
+          openPasswordModal();
+          document.getElementById('loginScreen').classList.add('hidden');
+        } else {
+          document.getElementById('loginScreen').classList.add('hidden');
+          document.getElementById('mainScreen').classList.remove('hidden');
+          const date = document.getElementById('workDate').value;
+          await loadInit(date);
+          showAlert(`Welcome ${data.user.name}!`, 'success');
+        }
+      } catch(e) {
+        showAlert('Invalid username or password', 'error', 'login');
+      }
+    }
+
+    function logout() { location.reload(); }
+
+    function updateCashDiffPreview() {
+      const systemSales = parseMoney(document.getElementById('systemSalesAmount').value);
+      const cashCounted = parseMoney(document.getElementById('cashCountAmount').value);
+      const diff = cashCounted - systemSales;
+
+      document.getElementById('cashVsSalesDiff').textContent = 'TZS ' + formatNumber(diff);
+
+      const shortageText = document.getElementById('shortageRemainingText');
+      const reasonsBox = document.getElementById('reasonsBox');
+
+      if (diff < 0) {
+        shortageText.textContent = `Upungufu: TZS ${formatNumber(Math.abs(diff))}`;
+        reasonsBox.classList.remove('hidden');
+      } else if (diff > 0) {
+        shortageText.textContent = `Ziada: TZS ${formatNumber(diff)}`;
+        reasonsBox.classList.add('hidden');
+      } else {
+        shortageText.textContent = 'Hakuna tofauti';
+        reasonsBox.classList.add('hidden');
+      }
+    }
+
+    function addReasonRow() {
+      const tpl = document.getElementById('reasonTemplate');
+      const clone = tpl.content.firstElementChild.cloneNode(true);
+
+      const reasonType = clone.querySelector('.reasonType');
+      const reasonOther = clone.querySelector('.reasonOther');
+      const reasonAmount = clone.querySelector('.reasonAmount');
+      const removeBtn = clone.querySelector('.removeReasonBtn');
+
+      reasonType.addEventListener('change', () => {
+        reasonOther.style.display = reasonType.value === 'Other' ? 'block' : 'none';
+      });
+
+      reasonAmount.addEventListener('input', () => {
+        const n = parseMoney(reasonAmount.value);
+        reasonAmount.value = n ? formatNumber(n) : '';
+      });
+
+      removeBtn.addEventListener('click', () => clone.remove());
+
+      document.getElementById('reasonsList').appendChild(clone);
+    }
+
+    function buildRef(prefix='TX') {
+      return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
+    }
+
+    async function saveCashAndSales() {
+      try {
+        const date = document.getElementById('workDate').value;
+        const systemSales = parseMoney(document.getElementById('systemSalesAmount').value);
+        const cashCounted = parseMoney(document.getElementById('cashCountAmount').value);
+        const note = document.getElementById('cashCountNote').value.trim();
+
+        if (!date) return showAlert('Tafadhali chagua tarehe', 'error');
+        if (!systemSales && !cashCounted) return showAlert('Weka mauzo na cash iliyohesabiwa', 'error');
+
+        await apiCall('addTx', {
+          date,
+          type: 'CASH_COUNT',
+          category: 'System Sales vs Cash Count',
+          amount: cashCounted,
+          source: 'SYSTEM',
+          note: JSON.stringify({ systemSales, cashCounted, note }),
+          cashier: currentUser?.username || '',
+          ref: buildRef('CASH')
+        }, true, 'Saving…', 'Writing to Transactions');
+
+        const diff = cashCounted - systemSales;
+        if (diff < 0) {
+          const rows = Array.from(document.querySelectorAll('#reasonsList .reason-row'));
+          for (const row of rows) {
+            const type = row.querySelector('.reasonType').value;
+            const other = row.querySelector('.reasonOther').value.trim();
+            const amount = parseMoney(row.querySelector('.reasonAmount').value);
+
+            if (!type || !amount) continue;
+            if (type === 'Other' && !other) {
+              return showAlert('Ukichagua Other lazima uandike sababu', 'error');
+            }
+
+            await apiCall('addTx', {
+              date,
+              type: 'CASH_REASON',
+              category: (type === 'Other') ? other : type,
+              amount,
+              source: 'REASON',
+              note: 'Shortage explanation',
+              cashier: currentUser?.username || '',
+              ref: buildRef('REASON')
+            }, true, 'Saving…', 'Writing shortage reasons');
+          }
+        }
+
+        document.getElementById('systemSalesAmount').value = '';
+        document.getElementById('cashCountAmount').value = '';
+        document.getElementById('cashCountNote').value = '';
+        document.getElementById('reasonsList').innerHTML = '';
+        updateCashDiffPreview();
+        await refreshDashboard();
+        showAlert('Cash count saved successfully', 'success');
+      } catch (e) {
+        showAlert(e.message || 'Failed to save cash count', 'error');
+      }
+    }
+
+    async function saveDeposit() {
+      try {
+        const date = document.getElementById('workDate').value;
+        const office = parseMoney(document.getElementById('depositOffice').value);
+        const director = parseMoney(document.getElementById('depositDirector').value);
+        const note = document.getElementById('depositNote').value.trim();
+
+        if (!date) return showAlert('Tafadhali chagua tarehe', 'error');
+        if (!office && !director) return showAlert('Weka kiasi cha deposit', 'error');
+
+        if (office > 0) {
+          await apiCall('addTx', {
+            date,
+            type: 'DEPOSIT',
+            category: 'Office Deposit',
+            amount: office,
+            source: 'OFFICE',
+            note,
+            cashier: currentUser?.username || '',
+            ref: buildRef('DEP')
+          }, true, 'Saving…', 'Writing office deposit');
+        }
+
+        if (director > 0) {
+          await apiCall('addTx', {
+            date,
+            type: 'DEPOSIT',
+            category: 'Director Deposit',
+            amount: director,
+            source: 'DIRECTOR',
+            note,
+            cashier: currentUser?.username || '',
+            ref: buildRef('DEP')
+          }, true, 'Saving…', 'Writing director deposit');
+        }
+
+        document.getElementById('depositOffice').value = '';
+        document.getElementById('depositDirector').value = '';
+        document.getElementById('depositNote').value = '';
+
+        await refreshDashboard();
+        showAlert('Deposit saved successfully', 'success');
+      } catch (e) {
+        showAlert(e.message || 'Failed to save deposit', 'error');
+      }
+    }
+
+    async function searchTransactions() {
+      try {
+        const fromDate = document.getElementById('searchDateFrom').value;
+        const toDate = document.getElementById('searchDateTo').value;
+        const type = document.getElementById('searchType').value;
+        const source = document.getElementById('searchSource').value;
+        const category = document.getElementById('searchCategory').value.trim();
+
+        const data = await apiCall('searchTransactions', {
+          fromDate,
+          toDate,
+          type,
+          source,
+          category
+        }, true, 'Searching…', 'Fetching records');
+
+        const rows = data.transactions || [];
+        const tbody = document.getElementById('searchResultsBody');
+
+        if (!rows.length) {
+          tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px;">Hakuna matokeo</td></tr>';
+          document.getElementById('searchSummary').textContent = 'Jumla: TZS 0';
+          return;
+        }
+
+        let total = 0;
+        tbody.innerHTML = rows.map(r => {
+          total += Number(r.amount || 0);
+          return `
+            <tr>
+              <td>${r.date || ''}</td>
+              <td>${r.type || ''}</td>
+              <td>${r.category || ''}</td>
+              <td>TZS ${formatNumber(r.amount || 0)}</td>
+              <td>${r.source || ''}</td>
+              <td>${r.note || ''}</td>
+              <td>${r.cashier || ''}</td>
+            </tr>
+          `;
+        }).join('');
+
+        document.getElementById('searchSummary').textContent = `Jumla: TZS ${formatNumber(total)}`;
+      } catch (e) {
+        showAlert(e.message || 'Search failed', 'error');
+      }
+    }
+
+    function exportSearchResults() {
+      const rows = Array.from(document.querySelectorAll('#searchResults table tr'));
+      if (rows.length <= 1) return showAlert('Hakuna data ya ku-export', 'warning');
+
+      const csv = rows.map(row =>
+        Array.from(row.querySelectorAll('th,td'))
+          .map(cell => `"${cell.innerText.replace(/"/g, '""')}"`)
+          .join(',')
+      ).join('\n');
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `cashier_search_${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+    }
+
+    document.getElementById('loginBtn').addEventListener('click', login);
+    document.getElementById('logoutBtn').addEventListener('click', logout);
+    document.getElementById('refreshBtn').addEventListener('click', refreshDashboard);
+
+    document.getElementById('tabCashCount').addEventListener('click', () => setActiveTab('CashCount'));
+    document.getElementById('tabDeposit').addEventListener('click', () => setActiveTab('Deposit'));
+    document.getElementById('tabSearch').addEventListener('click', () => setActiveTab('Search'));
+
+    document.getElementById('addReasonBtn').addEventListener('click', addReasonRow);
+    document.getElementById('saveCashAndSalesBtn').addEventListener('click', saveCashAndSales);
+    document.getElementById('saveDepositBtn').addEventListener('click', saveDeposit);
+    document.getElementById('searchBtn').addEventListener('click', searchTransactions);
+    document.getElementById('exportSearchBtn').addEventListener('click', exportSearchResults);
+    document.getElementById('saveNewPasswordBtn').addEventListener('click', changePassword);
+
+    document.getElementById('workDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('searchDateFrom').value = new Date().toISOString().split('T')[0];
+    document.getElementById('searchDateTo').value = new Date().toISOString().split('T')[0];
+
+    setMoneyInputFormatting('systemSalesAmount');
+    setMoneyInputFormatting('cashCountAmount');
+    setMoneyInputFormatting('depositOffice');
+    setMoneyInputFormatting('depositDirector');
+  </script>
 </body>
 </html>
