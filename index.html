@@ -1,0 +1,799 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pocket Money System</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root{
+      --bg:#f4f6f9; --card:#ffffff; --ink:#22324a; --muted:#6b7280; --line:#e5e7eb;
+      --primary:#1e3a5f; --success:#10b981; --warning:#f59e0b; --danger:#b02a37;
+    }
+    body { font-family: "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--ink); padding: 20px; }
+    .container { max-width: 1240px; margin: 0 auto; }
+    .card { background: var(--card); border:1px solid var(--line); border-radius: 16px; padding: 20px; box-shadow:0 4px 14px rgba(0,0,0,.05); margin-bottom: 18px; }
+    .app-title { font-size: 1.7rem; font-weight: 800; color: var(--primary); margin-bottom: 8px; }
+    .subtitle { color: var(--muted); margin-bottom: 16px; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom: 18px; }
+    .user-pill { background:#f8fafc; border:1px solid var(--line); border-radius: 999px; padding: 10px 14px; font-weight: 700; color: var(--primary); }
+    .row { display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:14px; }
+    .row-3 { display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap:14px; }
+    .row-4 { display:grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap:14px; }
+    label { display:block; font-size:.9rem; color:#445; margin: 8px 0 6px; font-weight:600; }
+    input, select, textarea { width:100%; border:1px solid #d7dce3; background:#fbfcfe; border-radius:12px; padding: 12px 13px; font-size:15px; }
+    input:focus, select:focus, textarea:focus { outline:none; border-color:#9fb5d1; background:#fff; }
+    button { border:none; border-radius:12px; padding: 12px 16px; font-size:15px; font-weight: 800; cursor:pointer; }
+    .primary-btn { background: var(--primary); color:#fff; }
+    .secondary-btn { background:#e9eef6; color: var(--primary); }
+    .success-btn { background: var(--success); color:#fff; }
+    .danger-btn { background: var(--danger); color:#fff; }
+    .tabs { display:flex; gap:10px; flex-wrap:wrap; margin-bottom: 16px; }
+    .tab { background:#f4f7fb; color:var(--primary); border:1px solid var(--line); min-width: 140px; }
+    .tab.active { background: var(--primary); color: #fff; }
+    .hidden { display:none !important; }
+    .alert { display:none; padding: 12px 14px; border-radius: 12px; margin-bottom: 12px; font-weight:700; }
+    .alert.show { display:block; }
+    .alert.success { background:#e8f8f1; color:#0f7d57; }
+    .alert.error { background:#fdecec; color:#a22b37; }
+    .alert.warning { background:#fff6db; color:#9a6a00; }
+    .stat-box { background:#f8fafc; border:1px solid var(--line); border-radius:14px; padding:18px; text-align:center; }
+    .stat-label { color:var(--muted); font-size:.9rem; margin-bottom:8px; }
+    .stat-value { font-size:1.5rem; font-weight:800; color:var(--primary); }
+    .stat-value.success { color:var(--success); }
+    .stat-value.danger { color:var(--danger); }
+    .section-title { font-size:1.1rem; font-weight:800; color: var(--primary); margin-bottom: 14px; }
+    .badge { display:inline-block; margin-left:10px; padding:4px 10px; border-radius:999px; background:#eef4ff; color:var(--primary); font-size:.78rem; font-weight:800; }
+    .overlay { position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:9999; padding:16px; }
+    .overlay.show { display:flex; }
+    .overlay-card { background:#fff; border-radius:16px; border:1px solid var(--line); padding:22px; width:min(420px, 92vw); text-align:center; }
+    .spinner { width:42px; height:42px; border:4px solid #e5e7eb; border-top-color:var(--primary); border-radius:50%; margin: 0 auto 12px; animation: spin .9s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .expense-list { border:1px solid var(--line); border-radius: 12px; overflow:hidden; margin-top:14px; }
+    .expense-item { display:flex; justify-content:space-between; align-items:center; gap:10px; padding:12px 14px; border-bottom:1px solid #eef2f7; }
+    .expense-item:last-child { border-bottom:none; }
+    .expense-total { display:flex; justify-content:space-between; font-weight:800; background:#f8fafc; padding:14px; }
+    .pill { display:inline-block; font-size:.74rem; font-weight:800; border-radius:999px; padding:2px 8px; margin-left:8px; }
+    .pill-pocket { background:#e8f8f1; color:#0f7d57; }
+    .pill-sales { background:#fff6db; color:#9a6a00; }
+    .pill-director { background:#fdecec; color:#a22b37; }
+    table { width:100%; border-collapse: collapse; }
+    th, td { padding: 10px; border-bottom:1px solid #eef2f7; text-align:left; font-size:.92rem; }
+    th { position:sticky; top:0; background: var(--primary); color:#fff; }
+    #searchWrap { max-height:420px; overflow:auto; border:1px solid var(--line); border-radius:12px; }
+    .login-card { max-width:480px; margin: 40px auto 0; }
+    .muted { color: var(--muted); }
+    .modal { position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.45); z-index:10001; padding:16px; }
+    .modal.show { display:flex; }
+    .modal-content { background:#fff; border-radius:16px; border:1px solid var(--line); width:min(420px, 92vw); padding:20px; }
+    @media (max-width: 860px){
+      .row, .row-3, .row-4 { grid-template-columns: 1fr; }
+      body { padding: 14px; }
+      .expense-item { align-items:flex-start; flex-direction:column; }
+    }
+  </style>
+</head>
+<body>
+  <div id="loadingOverlay" class="overlay">
+    <div class="overlay-card">
+      <div class="spinner"></div>
+      <div style="font-weight:800; color:#1e3a5f; margin-bottom:4px;" id="loadingTitle">Please wait…</div>
+      <div class="muted" id="loadingMsg">Processing</div>
+    </div>
+  </div>
+
+  <div id="directorPaymentModal" class="modal">
+    <div class="modal-content">
+      <div class="section-title">Lipa Director</div>
+      <div class="stat-box" style="margin-bottom:12px;">
+        <div class="stat-label">Deni la Director</div>
+        <div class="stat-value danger" id="modalDirectorDebt">TZS 0</div>
+      </div>
+      <label>Kiasi cha Kulipa (TZS)</label>
+      <input type="text" id="directorPaymentAmount" placeholder="Weka kiasi">
+      <label>Maelezo</label>
+      <input type="text" id="directorPaymentNote" placeholder="e.g. reimbursement">
+      <div class="row" style="margin-top:12px;">
+        <button class="secondary-btn" id="closeDirectorModalBtn">Ghairi</button>
+        <button class="primary-btn" id="confirmDirectorPaymentBtn">Lipa</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div id="loginScreen" class="card login-card">
+      <div class="app-title">Pocket Money System</div>
+      <div class="subtitle">Login to continue</div>
+      <div id="loginAlert" class="alert"></div>
+
+      <label>Username</label>
+      <input type="text" id="username" placeholder="Username">
+
+      <label>Password</label>
+      <input type="password" id="password" placeholder="Password">
+
+      <div class="row" style="margin-top:12px;">
+        <button class="primary-btn" id="loginBtn">Login</button>
+        <button class="secondary-btn" id="demoFillBtn" type="button">Fill Last Username</button>
+      </div>
+    </div>
+
+    <div id="mainScreen" class="hidden">
+      <div class="topbar">
+        <div>
+          <div class="app-title">Pocket Money System</div>
+          <div class="subtitle">Pocket dashboard, expenses, top-up, director, loan, and search</div>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+          <div class="user-pill" id="userDisplay">—</div>
+          <button class="secondary-btn" id="logoutBtn">Logout</button>
+        </div>
+      </div>
+
+      <div id="mainAlert" class="alert"></div>
+
+      <div class="card">
+        <div class="row">
+          <div>
+            <label>Working Date</label>
+            <input type="date" id="workDate">
+          </div>
+          <div style="display:flex; align-items:end;">
+            <button class="secondary-btn" id="refreshBtn" style="width:100%;">Refresh Dashboard</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Dashboard <span class="badge">Pocket</span></div>
+        <div class="row-4">
+          <div class="stat-box">
+            <div class="stat-label">Opening Pocket Money</div>
+            <div class="stat-value" id="dashOpeningPocket">TZS 0</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Top Up ya Siku</div>
+            <div class="stat-value success" id="dashTopUpToday">TZS 0</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Balance Remaining</div>
+            <div class="stat-value" id="dashPocketBalance">TZS 0</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Deni la Director</div>
+            <div class="stat-value danger" id="dashDirectorDebt">TZS 0</div>
+          </div>
+        </div>
+        <div class="row" style="margin-top:14px;">
+          <div class="stat-box">
+            <div class="stat-label">Hatua</div>
+            <button class="success-btn" id="payDirectorBtn">Lipa Director</button>
+          </div>
+          <div class="stat-box">
+            <div class="muted">Loan module imebaki kwenye Pocket UI kama ulivyoomba.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button id="tabExpense" class="tab active">1. Matumizi</button>
+        <button id="tabPocket" class="tab">2. Pocket Top-up</button>
+        <button id="tabLoan" class="tab">3. Loan</button>
+        <button id="tabSearch" class="tab">4. Tafuta</button>
+      </div>
+
+      <div id="expenseTab" class="card">
+        <div class="section-title">Record Matumizi</div>
+
+        <div class="row">
+          <div>
+            <label>Expense Category</label>
+            <select id="expenseCategory">
+              <option value="">Chagua Matumizi</option>
+            </select>
+          </div>
+          <div>
+            <label>Kiasi (TZS)</label>
+            <input type="text" id="expenseAmount" placeholder="Andika kiasi">
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Malipo Kutoka</label>
+            <select id="expenseSource">
+              <option value="POCKET">Pocket Money</option>
+              <option value="SALES">Mauzo</option>
+              <option value="DIRECTOR">Director (Atadai)</option>
+            </select>
+          </div>
+          <div>
+            <label>Maelezo</label>
+            <input type="text" id="expenseNote" placeholder="e.g. Ambulance, internet">
+          </div>
+        </div>
+
+        <div class="row">
+          <button class="secondary-btn" id="addExpenseToListBtn">Ongeza kwenye orodha</button>
+          <button class="primary-btn" id="saveAllExpensesBtn" disabled>Hifadhi Matumizi Yote</button>
+        </div>
+
+        <div id="expenseListContainer" class="hidden">
+          <div class="expense-list" id="expenseList"></div>
+          <div class="expense-total">
+            <span>Jumla</span>
+            <span id="expenseListTotal">TZS 0</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="pocketTab" class="card hidden">
+        <div class="section-title">Pocket Top-up</div>
+
+        <div class="row">
+          <div>
+            <label>Kutoka</label>
+            <select id="pocketSource">
+              <option value="SALES">Kutoka Mauzo</option>
+              <option value="DIRECTOR">Director Cash</option>
+            </select>
+          </div>
+          <div>
+            <label>Kiasi (TZS)</label>
+            <input type="text" id="pocketAmount" placeholder="Weka kiasi">
+          </div>
+        </div>
+
+        <label>Maelezo</label>
+        <input type="text" id="pocketNote" placeholder="e.g. Top-up for small expenses">
+
+        <button class="primary-btn" id="savePocketBtn" style="margin-top:12px;">Save Pocket Top-up</button>
+      </div>
+
+      <div id="loanTab" class="card hidden">
+        <div class="section-title">Employee Loan Request</div>
+
+        <div class="row">
+          <div>
+            <label>Employee</label>
+            <select id="loanEmployee">
+              <option value="">Chagua Employee</option>
+            </select>
+          </div>
+          <div>
+            <label>Kiasi cha Loan (TZS)</label>
+            <input type="text" id="loanAmount" placeholder="Weka kiasi cha loan">
+          </div>
+        </div>
+
+        <label>Sababu / Maelezo</label>
+        <input type="text" id="loanReason" placeholder="Mfano: school fees, emergency, advance request">
+
+        <button class="primary-btn" id="saveLoanBtn" style="margin-top:12px;">Save Loan Request</button>
+      </div>
+
+      <div id="searchTab" class="card hidden">
+        <div class="section-title">Tafuta Transactions</div>
+        <div class="row-3">
+          <div>
+            <label>Tarehe Kuanzia</label>
+            <input type="date" id="searchDateFrom">
+          </div>
+          <div>
+            <label>Tarehe Mpaka</label>
+            <input type="date" id="searchDateTo">
+          </div>
+          <div>
+            <label>Aina</label>
+            <select id="searchType">
+              <option value="">Zote</option>
+              <option value="EXPENSE">Matumizi</option>
+              <option value="POCKET_TOPUP">Pocket Top-up</option>
+              <option value="DIRECTOR_PAYMENT">Director Payment</option>
+              <option value="EMPLOYEE_LOAN_REQUEST">Loan Request</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row-3">
+          <div>
+            <label>Chanzo</label>
+            <select id="searchSource">
+              <option value="">Zote</option>
+              <option value="POCKET">Pocket</option>
+              <option value="SALES">Mauzo</option>
+              <option value="DIRECTOR">Director</option>
+              <option value="LOAN">Loan</option>
+            </select>
+          </div>
+          <div>
+            <label>Category</label>
+            <select id="searchCategory">
+              <option value="">Zote</option>
+            </select>
+          </div>
+          <div style="display:flex; align-items:end;">
+            <button class="primary-btn" id="searchBtn" style="width:100%;">Tafuta</button>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:12px;">
+          <button class="secondary-btn" id="exportSearchBtn" style="width:100%;">Export Results</button>
+        </div>
+
+        <div id="searchWrap" style="margin-top:14px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Tarehe</th>
+                <th>Aina</th>
+                <th>Category</th>
+                <th>Kiasi</th>
+                <th>Chanzo</th>
+                <th>Maelezo</th>
+                <th>Cashier</th>
+              </tr>
+            </thead>
+            <tbody id="searchResultsBody">
+              <tr><td colspan="7" style="text-align:center; padding:18px;">Bonyeza "Tafuta" kuona matokeo</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div id="searchSummary" style="margin-top:10px; font-weight:800; text-align:right;">Jumla: TZS 0</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzS65VR2IOqbcYwNUjtQnrwutJsPaV3Z1mskYYyuC87IAX1IZeM0mssYRiFwLGaTOOx/exec";
+const APP_MODE = "POCKET";
+
+let currentUser = null;
+let sessionToken = null;
+let categories = [];
+let employees = [];
+let pendingExpenses = [];
+let directorDebt = 0;
+
+function $(id){ return document.getElementById(id); }
+function setOverlay(show, title='Please wait…', msg='Processing…'){
+  $('loadingTitle').textContent = title;
+  $('loadingMsg').textContent = msg;
+  $('loadingOverlay').classList.toggle('show', !!show);
+}
+function showAlert(msg, type='success', target='main'){
+  const el = target === 'login' ? $('loginAlert') : $('mainAlert');
+  el.className = `alert show ${type}`;
+  el.textContent = msg;
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 4500);
+}
+function todayISO(){
+  const d = new Date();
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  const dd = String(d.getDate()).padStart(2,'0');
+  return `${d.getFullYear()}-${mm}-${dd}`;
+}
+function formatNumber(n){ return Number(n || 0).toLocaleString('en-US'); }
+function parseMoney(v){ return Number(String(v || '').replace(/[^\d.-]/g,'') || 0); }
+function fmtTZS(n){ return `TZS ${formatNumber(n)}`; }
+function setMoneyInputFormatting(el){
+  el.addEventListener('input', () => {
+    const val = parseMoney(el.value);
+    el.value = val ? formatNumber(val) : '';
+  });
+}
+function makeRef(){
+  const rand = Math.random().toString(36).slice(2, 10);
+  return `${currentUser?.username || 'user'}-${Date.now()}-${rand}`;
+}
+
+async function apiCall(action, payload = {}, auth = true, title='Please wait…', msg='Processing…'){
+  setOverlay(true, title, msg);
+  try{
+    const res = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({
+        action,
+        token: auth ? sessionToken : '',
+        ...payload
+      })
+    });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || 'Request failed');
+    return data;
+  } finally {
+    setOverlay(false);
+  }
+}
+
+function defaultCategories(){
+  return [
+    "Ambulance","Bahasha","Chakula","EFD Machine Service","ENT","Eye","Generator","Internet",
+    "Kuchoma Takataka","Laboratory","Mafuta ya Gari Director","Matangazo Redio","Mengineyo",
+    "Mobile Bundle","Nauli","Nauli ya OT","OBGY","OT","Peditrician","Physiotherapy",
+    "Purchases","Replacement of Items","Stationeries","Ufundi","Umeme","USS","Vifaa vya Usafi","Waybill"
+  ];
+}
+
+function fillCategories(){
+  const opts = ['<option value="">Chagua Matumizi</option>']
+    .concat(categories.map(c => `<option value="${c}">${c}</option>`)).join('');
+  $('expenseCategory').innerHTML = opts;
+  $('searchCategory').innerHTML = '<option value="">Zote</option>' + categories.map(c => `<option value="${c}">${c}</option>`).join('');
+}
+function populateEmployees(){
+  $('loanEmployee').innerHTML = '<option value="">Chagua Employee</option>' + employees.map(e => {
+    const v = e.name || e.username || e;
+    return `<option value="${v}">${v}</option>`;
+  }).join('');
+}
+
+function filterPocketDashboard(d){
+  return {
+    openingPocket: d.openingPocket ?? d.pocketOpening ?? 0,
+    topUpToday: d.topUpToday ?? d.pocketTopupToday ?? d.topup ?? 0,
+    pocketBalance: d.pocketBalance ?? d.pocket ?? 0,
+    directorDebt: d.directorDebt ?? 0
+  };
+}
+
+function renderDashboard(d = {}){
+  const x = filterPocketDashboard(d);
+  directorDebt = x.directorDebt;
+  $('dashOpeningPocket').textContent = fmtTZS(x.openingPocket);
+  $('dashTopUpToday').textContent = fmtTZS(x.topUpToday);
+  $('dashPocketBalance').textContent = fmtTZS(x.pocketBalance);
+  $('dashDirectorDebt').textContent = fmtTZS(x.directorDebt);
+  $('modalDirectorDebt').textContent = fmtTZS(x.directorDebt);
+}
+
+function setActiveTab(tab){
+  ['Expense','Pocket','Loan','Search'].forEach(t => {
+    $(`tab${t}`).classList.toggle('active', t === tab);
+    $(`${t.charAt(0).toLowerCase()+t.slice(1)}Tab`).classList.toggle('hidden', t !== tab);
+  });
+}
+
+async function loadInit(date){
+  const data = await apiCall('getInit', { date, system: APP_MODE }, true, 'Loading…', 'Fetching dashboard and lists');
+  categories = Array.isArray(data.categories) && data.categories.length ? data.categories : defaultCategories();
+  employees = Array.isArray(data.employees) ? data.employees : [];
+  fillCategories();
+  populateEmployees();
+  renderDashboard(data.dashboard || {});
+}
+
+async function login(){
+  const username = $('username').value.trim().toLowerCase();
+  const password = $('password').value;
+  if (!username || !password) return showAlert('Weka username na password', 'error', 'login');
+
+  try{
+    const data = await apiCall('login', { username, password, system: APP_MODE }, false, 'Logging in…', 'Checking credentials');
+    sessionToken = data.token;
+    currentUser = data.user || { username, name: username, role: 'Cashier' };
+    localStorage.setItem('pocket_username', username);
+    $('userDisplay').textContent = `${currentUser.name || currentUser.username} (${currentUser.role || 'User'})`;
+    $('loginScreen').classList.add('hidden');
+    $('mainScreen').classList.remove('hidden');
+    $('workDate').value = $('workDate').value || todayISO();
+    await loadInit($('workDate').value);
+    showAlert(`Welcome ${currentUser.name || currentUser.username}!`, 'success');
+  } catch(e){
+    showAlert(e.message || 'Invalid username or password', 'error', 'login');
+  }
+}
+
+function logout(){
+  sessionToken = null;
+  currentUser = null;
+  location.reload();
+}
+
+async function refreshDashboardOnly(){
+  try{
+    const date = $('workDate').value;
+    const data = await apiCall('getDashboard', { date, system: APP_MODE }, true, 'Refreshing…', 'Updating dashboard');
+    renderDashboard(data.dashboard || {});
+    showAlert('Dashboard updated', 'success');
+  } catch(e){
+    showAlert(e.message, 'error');
+  }
+}
+
+async function addTx({date, type, category, amount, source, note}){
+  return await apiCall('addTx', {
+    date, type, category, amount: String(amount), source, note,
+    cashier: currentUser?.username || 'Unknown',
+    ref: makeRef(),
+    system: APP_MODE
+  }, true, 'Saving…', 'Recording transaction');
+}
+
+function updateExpenseList(){
+  const container = $('expenseListContainer');
+  const listEl = $('expenseList');
+  const totalEl = $('expenseListTotal');
+  const saveBtn = $('saveAllExpensesBtn');
+
+  if (!pendingExpenses.length){
+    container.classList.add('hidden');
+    listEl.innerHTML = '';
+    totalEl.textContent = 'TZS 0';
+    saveBtn.disabled = true;
+    return;
+  }
+
+  let total = 0;
+  listEl.innerHTML = pendingExpenses.map((x, idx) => {
+    total += x.amount;
+    const badgeClass = x.source === 'POCKET' ? 'pill-pocket' : x.source === 'SALES' ? 'pill-sales' : 'pill-director';
+    return `
+      <div class="expense-item">
+        <div>
+          <div style="font-weight:800; color:#1e3a5f;">${x.category}<span class="pill ${badgeClass}">${x.source}</span></div>
+          <div class="muted">${x.note || '-'}</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div style="font-weight:800;">TZS ${formatNumber(x.amount)}</div>
+          <button class="secondary-btn" onclick="removeExpense(${idx})">✕</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+  totalEl.textContent = fmtTZS(total);
+  container.classList.remove('hidden');
+  saveBtn.disabled = false;
+}
+
+window.removeExpense = function(idx){
+  pendingExpenses.splice(idx, 1);
+  updateExpenseList();
+};
+
+function addExpenseToList(){
+  const category = $('expenseCategory').value;
+  const amount = parseMoney($('expenseAmount').value);
+  const source = $('expenseSource').value;
+  const note = $('expenseNote').value.trim();
+
+  if (!category) return showAlert('Chagua category', 'error');
+  if (amount <= 0) return showAlert('Weka kiasi sahihi', 'error');
+
+  pendingExpenses.push({ category, amount, source, note });
+  $('expenseCategory').value = '';
+  $('expenseAmount').value = '';
+  $('expenseNote').value = '';
+  updateExpenseList();
+}
+
+async function saveAllExpenses(){
+  const btn = $('saveAllExpensesBtn');
+  btn.disabled = true;
+  try{
+    const date = $('workDate').value;
+    if (!date) return showAlert('Chagua tarehe', 'error');
+    if (!pendingExpenses.length) return showAlert('Hakuna matumizi kwenye orodha', 'error');
+
+    for (const x of pendingExpenses){
+      await addTx({
+        date, type:'EXPENSE', category:x.category, amount:x.amount,
+        source:x.source, note:x.note
+      });
+    }
+
+    pendingExpenses = [];
+    updateExpenseList();
+    await refreshDashboardOnly();
+    showAlert('Matumizi yamehifadhiwa', 'success');
+  } catch(e){
+    showAlert(e.message, 'error');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function savePocketTopup(){
+  const btn = $('savePocketBtn');
+  btn.disabled = true;
+  try{
+    const date = $('workDate').value;
+    const source = $('pocketSource').value;
+    const amount = parseMoney($('pocketAmount').value);
+    const note = $('pocketNote').value.trim();
+
+    if (!date) return showAlert('Chagua tarehe', 'error');
+    if (amount <= 0) return showAlert('Weka kiasi sahihi', 'error');
+
+    await addTx({
+      date, type:'POCKET_TOPUP',
+      category: source === 'DIRECTOR' ? 'Director' : 'Sales',
+      amount, source, note
+    });
+
+    $('pocketAmount').value = '';
+    $('pocketNote').value = '';
+    await refreshDashboardOnly();
+    showAlert('Pocket top-up imehifadhiwa', 'success');
+  } catch(e){
+    showAlert(e.message, 'error');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function openDirectorModal(){
+  $('modalDirectorDebt').textContent = fmtTZS(directorDebt);
+  $('directorPaymentAmount').value = '';
+  $('directorPaymentNote').value = '';
+  $('directorPaymentModal').classList.add('show');
+}
+function closeDirectorModal(){
+  $('directorPaymentModal').classList.remove('show');
+}
+
+async function payDirector(){
+  const btn = $('confirmDirectorPaymentBtn');
+  btn.disabled = true;
+  try{
+    const date = $('workDate').value;
+    const amount = parseMoney($('directorPaymentAmount').value);
+    const note = $('directorPaymentNote').value.trim();
+
+    if (!date) return showAlert('Chagua tarehe', 'error');
+    if (amount <= 0) return showAlert('Weka kiasi sahihi', 'error');
+
+    await addTx({
+      date, type:'DIRECTOR_PAYMENT', category:'Director Payment',
+      amount, source:'DIRECTOR', note
+    });
+
+    closeDirectorModal();
+    await refreshDashboardOnly();
+    showAlert('Malipo ya director yamehifadhiwa', 'success');
+  } catch(e){
+    showAlert(e.message, 'error');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function saveLoanRequest(){
+  const btn = $('saveLoanBtn');
+  btn.disabled = true;
+  try{
+    const date = $('workDate').value;
+    const employee = $('loanEmployee').value;
+    const amount = parseMoney($('loanAmount').value);
+    const reason = $('loanReason').value.trim();
+
+    if (!date) return showAlert('Chagua tarehe', 'error');
+    if (!employee) return showAlert('Chagua employee', 'error');
+    if (amount <= 0) return showAlert('Weka kiasi sahihi', 'error');
+
+    await addTx({
+      date, type:'EMPLOYEE_LOAN_REQUEST', category:employee,
+      amount, source:'LOAN', note:reason
+    });
+
+    $('loanEmployee').value = '';
+    $('loanAmount').value = '';
+    $('loanReason').value = '';
+    showAlert('Loan request imehifadhiwa', 'success');
+  } catch(e){
+    showAlert(e.message, 'error');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function normalizeRows(data){
+  return Array.isArray(data) ? data : (data.rows || data.transactions || []);
+}
+
+function filterPocketSearchRows(rows){
+  const allowed = new Set(['EXPENSE','POCKET_TOPUP','DIRECTOR_PAYMENT','EMPLOYEE_LOAN_REQUEST']);
+  return rows.filter(r => allowed.has(r.type));
+}
+
+function renderSearchResults(rows){
+  const tbody = $('searchResultsBody');
+  const summary = $('searchSummary');
+  if (!rows.length){
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:18px;">Hakuna matokeo</td></tr>';
+    summary.textContent = 'Jumla: TZS 0';
+    return;
+  }
+  let total = 0;
+  tbody.innerHTML = rows.map(t => {
+    total += Number(t.amount || 0);
+    return `
+      <tr>
+        <td>${t.date || '-'}</td>
+        <td>${t.type || '-'}</td>
+        <td>${t.category || '-'}</td>
+        <td style="text-align:right;">TZS ${formatNumber(t.amount)}</td>
+        <td>${t.source || '-'}</td>
+        <td>${(t.note || '-').toString().replace(/</g,'&lt;')}</td>
+        <td>${t.cashier || '-'}</td>
+      </tr>
+    `;
+  }).join('');
+  summary.textContent = `Jumla: TZS ${formatNumber(total)}`;
+}
+
+async function searchTransactions(){
+  try{
+    const payload = {
+      dateFrom: $('searchDateFrom').value,
+      dateTo: $('searchDateTo').value,
+      type: $('searchType').value,
+      source: $('searchSource').value,
+      category: $('searchCategory').value,
+      system: APP_MODE
+    };
+    const data = await apiCall('searchTransactions', payload, true, 'Searching…', 'Fetching transactions');
+    const rows = filterPocketSearchRows(normalizeRows(data));
+    renderSearchResults(rows);
+    showAlert('Search completed', 'success');
+  } catch(e){
+    showAlert(e.message, 'error');
+  }
+}
+
+function exportSearchResults(){
+  const rows = [...document.querySelectorAll('#searchResultsBody tr')];
+  if (!rows.length || rows[0].children.length === 1){
+    return showAlert('Hakuna data ya kuexport', 'warning');
+  }
+  let csv = 'Tarehe,Aina,Category,Kiasi,Chanzo,Maelezo,Cashier\n';
+  rows.forEach(row => {
+    const cols = [...row.querySelectorAll('td')].map(td => `"${td.textContent.replace(/"/g,'""')}"`);
+    csv += cols.join(',') + '\n';
+  });
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `pocket_search_${todayISO()}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  $('workDate').value = todayISO();
+  $('searchDateFrom').value = todayISO();
+  $('searchDateTo').value = todayISO();
+
+  ['expenseAmount','pocketAmount','loanAmount','directorPaymentAmount'].forEach(id => setMoneyInputFormatting($(id)));
+
+  $('loginBtn').addEventListener('click', login);
+  $('demoFillBtn').addEventListener('click', () => $('username').value = localStorage.getItem('pocket_username') || '');
+  $('logoutBtn').addEventListener('click', logout);
+  $('refreshBtn').addEventListener('click', refreshDashboardOnly);
+
+  $('tabExpense').addEventListener('click', () => setActiveTab('Expense'));
+  $('tabPocket').addEventListener('click', () => setActiveTab('Pocket'));
+  $('tabLoan').addEventListener('click', () => setActiveTab('Loan'));
+  $('tabSearch').addEventListener('click', () => setActiveTab('Search'));
+
+  $('addExpenseToListBtn').addEventListener('click', addExpenseToList);
+  $('saveAllExpensesBtn').addEventListener('click', saveAllExpenses);
+  $('savePocketBtn').addEventListener('click', savePocketTopup);
+  $('saveLoanBtn').addEventListener('click', saveLoanRequest);
+  $('searchBtn').addEventListener('click', searchTransactions);
+  $('exportSearchBtn').addEventListener('click', exportSearchResults);
+
+  $('payDirectorBtn').addEventListener('click', openDirectorModal);
+  $('closeDirectorModalBtn').addEventListener('click', closeDirectorModal);
+  $('confirmDirectorPaymentBtn').addEventListener('click', payDirector);
+  $('directorPaymentModal').addEventListener('click', (e) => {
+    if (e.target.id === 'directorPaymentModal') closeDirectorModal();
+  });
+});
+</script>
+</body>
+</html>
