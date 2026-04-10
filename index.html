@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>Matumizi Clinic | Role-Based Cash Management</title>
+  <title>Matumizi Clinic | Sheet-Based Role Access</title>
   <style>
-    /* === ORIGINAL STYLE PRESERVED === */
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: "Segoe UI", Roboto, sans-serif; background: #f4f6f9; padding: 24px; color: #2c3e50; }
     .container { max-width: 1200px; margin: auto; }
@@ -20,7 +19,6 @@
     button:active { transform: translateY(1px); }
     .primary-btn { background:#1e3a5f; color:#fff; }
     .secondary-btn { background:#e9edf3; color:#1e3a5f; }
-    .success-btn { background:#10b981; color:#fff; }
     .row { display:grid; grid-template-columns: 1fr 1fr; gap:14px; }
     .row-3 { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:14px; }
     .tabs { display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap; }
@@ -59,7 +57,7 @@
     .expense-amount { font-weight:800; margin:0 15px; min-width:100px; text-align:right; }
     .remove-expense { color:#b02a37; background:none; border:none; font-size:1.2rem; cursor:pointer; padding:5px 10px; }
     .expense-total { display:flex; justify-content:space-between; align-items:center; padding:15px; background:#f8fafc; border-radius:0 0 10px 10px; font-weight:800; border-top:2px solid #1e3a5f; }
-    .role-indicator { background: #1e3a5f10; border-radius: 12px; padding: 8px 16px; font-weight: 600; font-size: 0.85rem; color: #1e3a5f; margin-bottom: 16px; }
+    .role-banner { background: #1e3a5f10; border-radius: 12px; padding: 8px 16px; margin-bottom: 16px; font-weight: 600; font-size: 0.85rem; border-left: 3px solid #1e3a5f; }
     @media (max-width: 640px) { 
       body{padding:14px;} 
       .row{grid-template-columns:1fr;} 
@@ -77,16 +75,19 @@
   <div id="loginScreen" class="card" style="max-width:480px; margin:40px auto;">
     <div class="app-title">🏥 Clinic Cash Management</div>
     <div id="loginAlert" class="alert"></div>
-    <label>Username</label><input type="text" id="username" placeholder="e.g., Brigita, Angel, mercy, Frida, sarah, admin">
+    <label>Username</label><input type="text" id="username" placeholder="Username">
     <label>Password</label><input type="password" id="password" placeholder="Password">
     <button class="primary-btn" id="loginBtn" style="width:100%">Login</button>
+    <div style="font-size:12px; margin-top:16px; color:#6c757d; text-align:center;">
+      📌 Roles: Cashier → Collection Desk | Treasurer → Pocket Money | Admin → Full Access
+    </div>
   </div>
 
-  <!-- MAIN APP with ROLE-BASED ACCESS -->
+  <!-- MAIN APP with ROLE-BASED ACCESS (from Google Sheet) -->
   <div id="mainScreen" class="hidden">
     <div class="topbar">
       <div class="app-title">💰 Cash Management System</div>
-      <div style="display:flex; gap:12px;"><div class="user-pill"><span id="userDisplay">—</span></div><button class="secondary-btn" id="logoutBtn">Logout</button></div>
+      <div style="display:flex; gap:12px;"><div class="user-pill"><span id="userDisplay">—</span><span id="userRoleBadge" style="margin-left:8px; font-size:11px;"></span></div><button class="secondary-btn" id="logoutBtn">Logout</button></div>
     </div>
     <div id="mainAlert" class="alert"></div>
 
@@ -96,8 +97,11 @@
     <!-- ROLE SELECTOR TABS - Only visible for Admin (both roles) -->
     <div id="roleSelector" class="tabs" style="display: none;">
       <div class="tab active" data-role="collection">💰 Collection Desk (Cashier)</div>
-      <div class="tab" data-role="pocket">👝 Pocket Money (Petty Cash)</div>
+      <div class="tab" data-role="pocket">👝 Pocket Money (Treasurer)</div>
     </div>
+
+    <!-- Role info banner for non-admin users -->
+    <div id="roleInfoBanner" class="role-banner hidden"></div>
 
     <!-- ==================== COLLECTION SECTION (Cashier role) ==================== -->
     <div id="collectionSection">
@@ -128,7 +132,7 @@
       <div id="searchTab" class="card hidden"><h3>🔍 Tafuta Transactions</h3><div class="row"><div><label>Kuanzia</label><input type="date" id="searchDateFrom"></div><div><label>Mpaka</label><input type="date" id="searchDateTo"></div></div><div class="row"><div><label>Aina</label><select id="searchType"><option value="">Zote</option><option value="SYSTEM_SALES">System Sales</option><option value="CASH_COUNT">Cash Count</option><option value="CASH_REASON">Cash Reason</option><option value="DEPOSIT">Deposit</option><option value="EMPLOYEE_LOAN_REQUEST">Loan Request</option></select></div><div style="display:flex; align-items:end;"><button class="primary-btn" id="searchBtn">🔍 Tafuta</button></div></div><button class="secondary-btn" id="exportSearchBtn" style="margin-top:10px; width:100%">📥 Export CSV</button><div id="searchResults" style="margin-top:20px; overflow-x:auto;"><table style="width:100%; border-collapse:collapse;"><thead style="background:#1e3a5f; color:white;"><tr><th>Tarehe</th><th>Aina</th><th>Kiasi</th><th>Maelezo</th><th>Cashier</th></tr></thead><tbody id="searchResultsBody"><tr><td colspan="5" style="text-align:center;">Hakuna data</td></tr></tbody></table><div id="searchTotal" style="text-align:right; font-weight:800; margin-top:10px;"></div></div></div>
     </div>
 
-    <!-- ==================== POCKET MONEY SECTION ==================== -->
+    <!-- ==================== POCKET MONEY SECTION (Treasurer role) ==================== -->
     <div id="pocketSection" class="hidden">
       <div class="section-card pocket">
         <h3>👝 POCKET MONEY DASHBOARD <span class="badge">Petty Cash</span></h3>
@@ -145,36 +149,9 @@
         <div class="tab" data-pocket-tab="pocketSearchTab">🔍 Pocket Transactions</div>
       </div>
 
-      <!-- Record Expense -->
-      <div id="expenseTab" class="card">
-        <h3>💰 Record Matumizi (Pocket Money)</h3>
-        <div class="row">
-          <div><label>Expense Category</label><select id="pocketExpenseCategory"><option value="">Chagua</option></select></div>
-          <div><label>Kiasi (TZS)</label><input type="text" id="pocketExpenseAmount" placeholder="Kiasi"></div>
-        </div>
-        <div class="row">
-          <div><label>Malipo Kutoka</label><select id="pocketExpenseSource"><option value="POCKET">💰 Pocket Money</option><option value="SALES">📊 Mauzo (Direct)</option><option value="DIRECTOR">👤 Director (Atadai)</option></select></div>
-          <div><label>Maelezo</label><input type="text" id="pocketExpenseNote" placeholder="e.g., Chakula, Nauli"></div>
-        </div>
-        <div class="row"><button class="secondary-btn" id="addExpenseToListBtn">➕ Ongeza kwenye Orodha</button><button class="primary-btn" id="saveAllExpensesBtn" disabled>💾 Hifadhi Matumizi Yote</button></div>
-        <div id="expenseListContainer" class="hidden"><h4>Orodha ya Matumizi</h4><div class="expense-list" id="expenseList"></div><div class="expense-total"><span>Jumla:</span><span id="expenseListTotal">TZS 0</span></div></div>
-      </div>
-
-      <!-- Top-up Pocket -->
-      <div id="topupTab" class="card hidden">
-        <h3>👝 Pocket Top-up</h3>
-        <div class="row"><div><label>Kutoka</label><select id="pocketSource"><option value="SALES">💰 Kutoka Mauzo</option><option value="DIRECTOR">👤 Director Cash</option></select></div><div><label>Kiasi (TZS)</label><input type="text" id="pocketTopupAmount" placeholder="Weka Kiwango"></div></div>
-        <label>Maelezo</label><input type="text" id="pocketTopupNote" placeholder="e.g., Top-up for expenses">
-        <button class="primary-btn" id="savePocketTopupBtn">Save Pocket Top-up</button>
-      </div>
-
-      <!-- Pocket Search -->
-      <div id="pocketSearchTab" class="card hidden">
-        <h3>🔍 Pocket Transactions (EXPENSE, TOPUP)</h3>
-        <div class="row"><div><label>Kuanzia</label><input type="date" id="pocketSearchFrom"></div><div><label>Mpaka</label><input type="date" id="pocketSearchTo"></div></div>
-        <button class="primary-btn" id="pocketSearchBtn" style="width:100%">🔍 Tafuta</button>
-        <div id="pocketSearchResults" style="margin-top:20px; overflow-x:auto;"><table style="width:100%; border-collapse:collapse;"><thead style="background:#1e3a5f; color:white;"><tr><th>Tarehe</th><th>Aina</th><th>Kiasi</th><th>Chanzo</th><th>Maelezo</th></tr></thead><tbody id="pocketSearchBody"><tr><td colspan="5">Hakuna matokeo</td></tr></tbody></table><div id="pocketSearchTotal" style="text-align:right; font-weight:800;"></div></div>
-      </div>
+      <div id="expenseTab" class="card"><h3>💰 Record Matumizi (Pocket Money)</h3><div class="row"><div><label>Expense Category</label><select id="pocketExpenseCategory"><option value="">Chagua</option></select></div><div><label>Kiasi (TZS)</label><input type="text" id="pocketExpenseAmount" placeholder="Kiasi"></div></div><div class="row"><div><label>Malipo Kutoka</label><select id="pocketExpenseSource"><option value="POCKET">💰 Pocket Money</option><option value="SALES">📊 Mauzo (Direct)</option><option value="DIRECTOR">👤 Director (Atadai)</option></select></div><div><label>Maelezo</label><input type="text" id="pocketExpenseNote" placeholder="e.g., Chakula, Nauli"></div></div><div class="row"><button class="secondary-btn" id="addExpenseToListBtn">➕ Ongeza kwenye Orodha</button><button class="primary-btn" id="saveAllExpensesBtn" disabled>💾 Hifadhi Matumizi Yote</button></div><div id="expenseListContainer" class="hidden"><h4>Orodha ya Matumizi</h4><div class="expense-list" id="expenseList"></div><div class="expense-total"><span>Jumla:</span><span id="expenseListTotal">TZS 0</span></div></div></div>
+      <div id="topupTab" class="card hidden"><h3>👝 Pocket Top-up</h3><div class="row"><div><label>Kutoka</label><select id="pocketSource"><option value="SALES">💰 Kutoka Mauzo</option><option value="DIRECTOR">👤 Director Cash</option></select></div><div><label>Kiasi (TZS)</label><input type="text" id="pocketTopupAmount" placeholder="Weka Kiwango"></div></div><label>Maelezo</label><input type="text" id="pocketTopupNote" placeholder="e.g., Top-up for expenses"><button class="primary-btn" id="savePocketTopupBtn">Save Pocket Top-up</button></div>
+      <div id="pocketSearchTab" class="card hidden"><h3>🔍 Pocket Transactions (EXPENSE, TOPUP)</h3><div class="row"><div><label>Kuanzia</label><input type="date" id="pocketSearchFrom"></div><div><label>Mpaka</label><input type="date" id="pocketSearchTo"></div></div><button class="primary-btn" id="pocketSearchBtn" style="width:100%">🔍 Tafuta</button><div id="pocketSearchResults" style="margin-top:20px; overflow-x:auto;"><table style="width:100%; border-collapse:collapse;"><thead style="background:#1e3a5f; color:white;"><tr><th>Tarehe</th><th>Aina</th><th>Kiasi</th><th>Chanzo</th><th>Maelezo</th></tr></thead><tbody id="pocketSearchBody"><tr><td colspan="5">Hakuna matokeo</td></tr></tbody></table><div id="pocketSearchTotal" style="text-align:right; font-weight:800;"></div></div></div>
     </div>
   </div>
 </div>
@@ -184,18 +161,15 @@
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzS65VR2IOqbcYwNUjtQnrwutJsPaV3Z1mskYYyuC87IAX1IZeM0mssYRiFwLGaTOOx/exec";
   let currentUser = null, sessionToken = null, employeesList = [], categoriesList = [];
 
-  // ROLE MAPPING: 
-  // - Cashiers (Collection only): Angel, mercy, Frida, sarah (and any other cashier)
-  // - Pocket manager: Brigita (only pocket side)
-  // - Admin: can access both
-  function getUserRoleAccess(username) {
-    const cashiers = ['angel', 'mercy', 'frida', 'sarah'];
-    const pocketManager = 'brigita';
-    const admin = 'admin';
-    if (username === admin) return 'admin';
-    if (username === pocketManager) return 'pocket';
-    if (cashiers.includes(username)) return 'cashier';
-    return 'cashier'; // default fallback
+  // ROLE MAPPING - these values come DIRECTLY from your Google Sheet "Users" tab column D (role)
+  // In your sheet, set role = "Cashier", "Treasurer", or "Admin"
+  // No hardcoded usernames! The sheet controls everything.
+  function getUserSectionAccess(roleFromSheet) {
+    const role = (roleFromSheet || "").toLowerCase();
+    if (role === "cashier") return "cashier";
+    if (role === "treasurer") return "treasurer";
+    if (role === "admin") return "admin";
+    return "cashier"; // default fallback
   }
 
   function setOverlay(show) { document.getElementById('loadingOverlay').classList.toggle('show', show); }
@@ -222,7 +196,6 @@
   async function addTx(date, type, category, amount, source, note) { return await apiCall('addTx', { date, type, category, amount:String(amount), source, note, cashier:currentUser?.username, ref:makeRef() }, true); }
   async function addBulkTx(transactions) { return await apiCall('addBulkTx', { transactions: JSON.stringify(transactions) }, true); }
 
-  // ========== LOAD INIT ==========
   async function loadInitData() {
     try {
       const date = document.getElementById('workDate').value;
@@ -242,7 +215,6 @@
   async function refreshAllDashboards() {
     const date = document.getElementById('workDate').value;
     if(!date) return;
-    // Collection Dashboard
     const collData = await apiCall('getDashboard', { date, system: "" }, false);
     const dash = collData.dashboard || {};
     document.getElementById('dashSystemSales').innerText = 'TZS ' + formatNumber(dash.systemSales || 0);
@@ -251,7 +223,6 @@
     document.getElementById('dashPendingDeposit').innerText = 'TZS ' + formatNumber(dash.pendingDeposit || 0);
     document.getElementById('dashDirectorDebt').innerText = 'TZS ' + formatNumber(dash.directorDebt || 0);
     document.getElementById('dashRemainingOffice').innerText = 'TZS ' + formatNumber(dash.officeExpected || 0);
-    // Pocket Dashboard
     document.getElementById('pocketBalance').innerText = 'TZS ' + formatNumber(dash.pocketClosing || 0);
     document.getElementById('pocketTodayExpenses').innerText = 'TZS ' + formatNumber(dash.totalExpenses || 0);
     const printData = await apiCall('getPrintData', { date }, false);
@@ -259,7 +230,7 @@
     document.getElementById('pocketTopupsTotal').innerText = 'TZS ' + formatNumber(topups);
   }
 
-  // ========== COLLECTION: Sales & Cash (with reasons) ==========
+  // ========== COLLECTION FUNCTIONS (same as before) ==========
   let pendingExpenses = [];
   window.removeExpense = function(idx) { pendingExpenses.splice(idx,1); renderExpenseList(); };
   function renderExpenseList() {
@@ -292,7 +263,6 @@
     try { await addBulkTx(transactions); pendingExpenses=[]; renderExpenseList(); showAlert(`Matumizi ${transactions.length} yamehifadhiwa`,'success'); await refreshAllDashboards(); } 
     catch(e) { showAlert(e.message,'error'); }
   }
-
   function collectReasonsFromUI() { const out=[]; document.querySelectorAll('#reasonsList .reason-row').forEach(row=>{ const type=row.querySelector('.reasonType')?.value, other=row.querySelector('.reasonOther')?.value, amt=parseMoney(row.querySelector('.reasonAmount')?.value); if(type && amt>0) out.push({ reason: type==='Other'?other:type, amount:amt }); }); return out; }
   function addReasonRow() { const container=document.getElementById('reasonsList'); const row=document.createElement('div'); row.className='reason-row'; row.innerHTML=`<select class="reasonType"><option value="">Chagua</option><option value="Lipa Mpesa">Lipa Mpesa</option><option value="Other">Other</option></select><input class="reasonOther" placeholder="Sababu"><input class="reasonAmount" placeholder="Kiasi"><button class="secondary-btn removeReasonBtn">✕</button>`; attachMoneyForElement(row.querySelector('.reasonAmount')); row.querySelector('.removeReasonBtn').onclick=()=>row.remove(); container.appendChild(row); }
   function attachMoneyForElement(el){ el.addEventListener('input',()=>{ const d=digitsOnly(el.value); el.value=d?Number(d).toLocaleString('en-US'):'';});}
@@ -309,29 +279,38 @@
     }
     try { await addBulkTx(transactions); document.getElementById('systemSalesAmount').value=''; document.getElementById('cashCountAmount').value=''; document.getElementById('cashCountNote').value=''; document.getElementById('reasonsList').innerHTML=''; showAlert('Saved','success'); await refreshAllDashboards(); } catch(e){ showAlert(e.message,'error'); }
   }
-
-  // ========== DEPOSIT, LOAN, SEARCH ==========
   async function saveDeposit() { const date=document.getElementById('workDate').value, amount=parseMoney(document.getElementById('depositAmount').value), note=document.getElementById('depositNote').value.trim(); if(!date||amount<=0) return showAlert('Weka kiasi','error'); await addTx(date,'DEPOSIT','Bank Deposit',amount,'OFFICE',note); document.getElementById('depositAmount').value=''; document.getElementById('depositNote').value=''; showAlert('Deposit saved','success'); await refreshAllDashboards(); }
   async function saveLoan() { const date=document.getElementById('workDate').value, emp=document.getElementById('loanEmployee').value, amount=parseMoney(document.getElementById('loanAmount').value), reason=document.getElementById('loanReason').value.trim(); if(!date||!emp||amount<=0) return showAlert('Fill all fields','error'); await addTx(date,'EMPLOYEE_LOAN_REQUEST',emp,amount,'LOAN',reason); document.getElementById('loanAmount').value=''; document.getElementById('loanReason').value=''; showAlert('Loan request saved','success'); await refreshAllDashboards(); }
-  async function searchTransactions() { const from=document.getElementById('searchDateFrom').value, to=document.getElementById('searchDateTo').value, type=document.getElementById('searchType').value; try{ const data=await apiCall('searchTransactions',{ fromDate:from, toDate:to, type, source:'', category:'', system:'CASHIER' }, true); const results=data.transactions||[]; let html='',total=0; results.forEach(t=>{ total+=t.amount; html+=`<tr><td style="padding:8px;">${t.date}</td><td>${t.type}</td><td style="text-align:right;">TZS ${formatNumber(t.amount)}</td><td>${t.note||t.category||'-'}</td><td>${t.cashier||'-'}</td></tr>`; }); document.getElementById('searchResultsBody').innerHTML=html||'<tr><td colspan="5">Hakuna matokeo</td></tr>'; document.getElementById('searchTotal').innerHTML=`Jumla: TZS ${formatNumber(total)}`; } catch(e){ showAlert(e.message,'error'); } }
+  async function searchTransactions() { const from=document.getElementById('searchDateFrom').value, to=document.getElementById('searchDateTo').value, type=document.getElementById('searchType').value; try{ const data=await apiCall('searchTransactions',{ fromDate:from, toDate:to, type, source:'', category:'', system:'CASHIER' }, true); const results=data.transactions||[]; let html='',total=0; results.forEach(t=>{ total+=t.amount; html+=`<tr><td style="padding:8px;">${t.date}</td><td>${t.type}</td><td style="text-align:right;">TZS ${formatNumber(t.amount)}</td><td>${t.note||t.category||'-'}</td><td>${t.cashier||'-'}</td>`; }); document.getElementById('searchResultsBody').innerHTML=html||'<tr><td colspan="5">Hakuna matokeo</td></tr>'; document.getElementById('searchTotal').innerHTML=`Jumla: TZS ${formatNumber(total)}`; } catch(e){ showAlert(e.message,'error'); } }
   function exportCSV() { const rows=document.querySelectorAll('#searchResultsBody tr'); if(rows.length<2) return; let csv='Tarehe,Aina,Kiasi,Maelezo,Cashier\n'; rows.forEach(r=>{ const cells=r.querySelectorAll('td'); if(cells.length>=4) csv+=`"${cells[0].innerText}","${cells[1].innerText}","${cells[2].innerText.replace('TZS ','')}","${cells[3].innerText}","${cells[4]?.innerText||''}"\n`; }); const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download=`transactions_${new Date().toISOString().slice(0,10)}.csv`; a.click(); }
   async function savePocketTopup() { const date=document.getElementById('workDate').value, source=document.getElementById('pocketSource').value, amount=parseMoney(document.getElementById('pocketTopupAmount').value), note=document.getElementById('pocketTopupNote').value.trim(); if(!date||amount<=0) return showAlert('Weka kiasi sahihi','error'); await addTx(date,'POCKET_TOPUP', (source==='DIRECTOR'?'Director':'Sales'), amount, source, note); document.getElementById('pocketTopupAmount').value=''; document.getElementById('pocketTopupNote').value=''; showAlert('Pocket top-up saved','success'); await refreshAllDashboards(); }
   async function searchPocketTransactions() { const from=document.getElementById('pocketSearchFrom').value, to=document.getElementById('pocketSearchTo').value; try{ const data=await apiCall('searchTransactions',{ fromDate:from, toDate:to, type:'', source:'', category:'', system:'POCKET' }, true); const results=data.transactions||[]; let html='',total=0; results.forEach(t=>{ total+=t.amount; html+=`<tr><td>${t.date}</td><td>${t.type}</td><td style="text-align:right;">TZS ${formatNumber(t.amount)}</td><td>${t.source||'-'}</td><td>${t.note||t.category||'-'}</td></tr>`; }); document.getElementById('pocketSearchBody').innerHTML=html||'<tr><td colspan="5">Hakuna matokeo</td></tr>'; document.getElementById('pocketSearchTotal').innerHTML=`Jumla: TZS ${formatNumber(total)}`; } catch(e){ showAlert(e.message,'error'); } }
 
-  // ========== UI TOGGLES BASED ON ROLE ==========
-  let currentRoleAccess = null;
-  function setRoleUI(role) {
-    if(role === 'cashier') {
+  // ========== UI SETUP BASED ON SHEET ROLE ==========
+  let currentAccessType = null;
+  function setupUIByRole(roleFromSheet) {
+    const access = getUserSectionAccess(roleFromSheet);
+    currentAccessType = access;
+    const roleDisplay = roleFromSheet || "Unknown";
+    document.getElementById('userRoleBadge').innerHTML = `🔹 ${roleDisplay}`;
+    
+    if(access === 'cashier') {
       document.getElementById('collectionSection').classList.remove('hidden');
       document.getElementById('pocketSection').classList.add('hidden');
       document.getElementById('roleSelector').style.display = 'none';
-    } else if(role === 'pocket') {
+      document.getElementById('roleInfoBanner').classList.remove('hidden');
+      document.getElementById('roleInfoBanner').innerHTML = '📍 You are logged in as <strong>Cashier</strong> — Access: Collection Desk (Sales, Cash Count, Deposits, Loans)';
+    } 
+    else if(access === 'treasurer') {
       document.getElementById('collectionSection').classList.add('hidden');
       document.getElementById('pocketSection').classList.remove('hidden');
       document.getElementById('roleSelector').style.display = 'none';
-    } else if(role === 'admin') {
+      document.getElementById('roleInfoBanner').classList.remove('hidden');
+      document.getElementById('roleInfoBanner').innerHTML = '📍 You are logged in as <strong>Treasurer</strong> — Access: Pocket Money (Petty Cash Expenses & Top-ups)';
+    } 
+    else if(access === 'admin') {
       document.getElementById('roleSelector').style.display = 'flex';
-      // default show collection for admin
+      document.getElementById('roleInfoBanner').classList.add('hidden');
       document.getElementById('collectionSection').classList.remove('hidden');
       document.getElementById('pocketSection').classList.add('hidden');
       document.querySelectorAll('[data-role]').forEach(tab => tab.classList.remove('active'));
@@ -340,7 +319,7 @@
   }
 
   function setRole(role) {
-    if(currentRoleAccess !== 'admin') return;
+    if(currentAccessType !== 'admin') return;
     document.getElementById('collectionSection').classList.toggle('hidden', role !== 'collection');
     document.getElementById('pocketSection').classList.toggle('hidden', role !== 'pocket');
     document.querySelectorAll('[data-role]').forEach(tab => tab.classList.toggle('active', tab.getAttribute('data-role') === role));
@@ -349,7 +328,7 @@
   function setCollectionTab(tabId) { document.querySelectorAll('[data-collection-tab]').forEach(t=>t.classList.remove('active')); document.querySelector(`[data-collection-tab="${tabId}"]`).classList.add('active'); document.getElementById('salesTab').classList.add('hidden'); document.getElementById('depositTab').classList.add('hidden'); document.getElementById('loanTab').classList.add('hidden'); document.getElementById('searchTab').classList.add('hidden'); document.getElementById(tabId).classList.remove('hidden'); }
   function setPocketTab(tabId) { document.querySelectorAll('[data-pocket-tab]').forEach(t=>t.classList.remove('active')); document.querySelector(`[data-pocket-tab="${tabId}"]`).classList.add('active'); document.getElementById('expenseTab').classList.add('hidden'); document.getElementById('topupTab').classList.add('hidden'); document.getElementById('pocketSearchTab').classList.add('hidden'); document.getElementById(tabId).classList.remove('hidden'); }
 
-  // ========== LOGIN with Role Check ==========
+  // ========== LOGIN - NO HARDCODED USERS, ALL FROM SHEET ==========
   async function login() {
     const u = document.getElementById('username').value.trim().toLowerCase();
     const p = document.getElementById('password').value;
@@ -357,17 +336,17 @@
       const data = await apiCall('login', { username: u, password: p }, true);
       sessionToken = data.token;
       currentUser = data.user;
-      const roleType = getUserRoleAccess(currentUser.username);
-      currentRoleAccess = roleType;
+      // The role comes DIRECTLY from your Google Sheet "Users" tab column D
+      const userRole = currentUser.role || "Cashier";
       document.getElementById('userDisplay').innerText = `${currentUser.name} (${currentUser.role})`;
       document.getElementById('loginScreen').classList.add('hidden');
       document.getElementById('mainScreen').classList.remove('hidden');
       const today = new Date().toISOString().slice(0,10);
       document.getElementById('workDate').value = today;
       await loadInitData();
-      setRoleUI(roleType);
-      showAlert(`Welcome ${currentUser.name} | Access: ${roleType === 'admin' ? 'Full Access' : (roleType === 'pocket' ? 'Pocket Money Desk' : 'Cashier Desk')}`, 'success');
-    } catch(e) { showAlert('Invalid credentials', 'error', 'login'); }
+      setupUIByRole(userRole);
+      showAlert(`Welcome ${currentUser.name}! Access: ${userRole}`, 'success');
+    } catch(e) { showAlert('Invalid credentials or server error', 'error', 'login'); }
   }
   function logout() { location.reload(); }
 
