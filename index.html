@@ -10,7 +10,7 @@
     .container { max-width: 1200px; margin: auto; }
     .app-title { font-size: 1.6rem; font-weight: 700; color: #1e3a5f; margin-bottom: 18px; }
     .card { background:#fff; border-radius:14px; padding:22px; margin-bottom:18px; box-shadow:0 4px 12px rgba(0,0,0,0.05); border:1px solid #e6e9ef; }
-    h3 { font-size: 1.1rem; margin-bottom: 14px; font-weight: 700; color: #1e3a5f; }
+    h3, h4 { font-size: 1.1rem; margin-bottom: 14px; font-weight: 700; color: #1e3a5f; }
     label { display:block; font-size:.85rem; color:#555; margin:8px 0 4px; font-weight:500; }
     input, select, textarea { width:100%; padding:12px; margin-bottom:12px; border:1px solid #dcdfe6; border-radius:10px; font-size:15px; background:#fafbfc; }
     input:focus, select:focus, textarea:focus { outline:none; border-color:#1e3a5f; background:#fff; }
@@ -19,6 +19,7 @@
     .primary-btn { background:#1e3a5f; color:#fff; }
     .secondary-btn { background:#e9edf3; color:#1e3a5f; }
     .success-btn { background:#10b981; color:#fff; }
+    .danger-btn { background:#b02a37; color:#fff; }
     .row { display:grid; grid-template-columns: 1fr 1fr; gap:14px; }
     .row-3 { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:14px; }
     .tabs { display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap; }
@@ -36,7 +37,6 @@
     .stat-value-red { font-size:1.5rem; font-weight:800; color:#b02a37; }
     .stat-value-orange { font-size:1.5rem; font-weight:800; color:#f59e0b; }
     .section-card { background:#fff; border-radius:14px; padding:20px; margin-bottom:20px; border-left:4px solid #1e3a5f; box-shadow:0 2px 8px rgba(0,0,0,0.03); }
-    .badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; margin-left: 10px; background: #eef2ff; color: #1e3a5f; }
     .topbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px; }
     .user-pill { background:#f5f7fa; border:1px solid #dcdfe6; padding:8px 12px; border-radius:999px; font-weight:800; color:#1e3a5f; }
     .overlay { position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:9999; }
@@ -49,19 +49,21 @@
     .reason-row input { margin:0; flex:2; }
     .reason-row button { margin:0; padding:10px 14px; }
     .expense-list { margin:15px 0; max-height:300px; overflow-y:auto; border:1px solid #e6e9ef; border-radius:10px; }
-    .expense-item { display:flex; justify-content:space-between; align-items:center; padding:12px; border-bottom:1px solid #eef1f5; }
-    .expense-item:last-child { border-bottom:none; }
+    .expense-item, .debtor-item { display:flex; justify-content:space-between; align-items:center; padding:12px; border-bottom:1px solid #eef1f5; gap:10px; }
+    .expense-item:last-child, .debtor-item:last-child { border-bottom:none; }
     .expense-details { flex:1; }
     .expense-category { font-weight:700; color:#1e3a5f; }
     .expense-amount { font-weight:800; margin:0 15px; min-width:100px; text-align:right; }
     .remove-expense { color:#b02a37; background:none; border:none; font-size:1.2rem; cursor:pointer; }
     .expense-total { display:flex; justify-content:space-between; align-items:center; padding:15px; background:#f8fafc; border-radius:0 0 10px 10px; font-weight:800; border-top:2px solid #1e3a5f; }
     .role-banner { background: #1e3a5f10; border-radius: 12px; padding: 8px 16px; margin-bottom: 16px; font-weight: 600; font-size: 0.85rem; border-left: 3px solid #1e3a5f; }
-    .debtor-item { display:flex; justify-content:space-between; align-items:center; padding:12px; border-bottom:1px solid #eef1f5; }
-    .debtor-item:last-child { border-bottom:none; }
     .credit-badge { background:#fef3c7; color:#b45309; padding:2px 8px; border-radius:12px; font-size:0.7rem; font-weight:700; }
-    @media (max-width: 640px) { 
-      body{padding:14px;} 
+    table { width:100%; border-collapse:collapse; }
+    th, td { padding:10px; border:1px solid #e6e9ef; text-align:left; font-size:14px; }
+    thead { background:#1e3a5f; color:white; }
+    .divider { height:1px; background:#e6e9ef; }
+    @media (max-width: 640px) {
+      body{padding:14px;}
       .row, .row-3 { grid-template-columns:1fr; }
       .tabs { flex-direction:column; }
       .reason-row { flex-direction:column; align-items:stretch; }
@@ -69,14 +71,21 @@
   </style>
 </head>
 <body>
-<div id="loadingOverlay" class="overlay"><div class="overlay-card"><div class="spinner"></div><div>Processing...</div></div></div>
+<div id="loadingOverlay" class="overlay">
+  <div class="overlay-card">
+    <div class="spinner"></div>
+    <div>Processing...</div>
+  </div>
+</div>
 
 <div class="container">
   <div id="loginScreen" class="card" style="max-width:480px; margin:40px auto;">
     <div class="app-title">🏥 Clinic Cash Management</div>
     <div id="loginAlert" class="alert"></div>
-    <label>Username</label><input type="text" id="username" placeholder="Username">
-    <label>Password</label><input type="password" id="password" placeholder="Password">
+    <label>Username</label>
+    <input type="text" id="username" placeholder="Username">
+    <label>Password</label>
+    <input type="password" id="password" placeholder="Password">
     <button class="primary-btn" id="loginBtn" style="width:100%">Login</button>
     <div style="font-size:12px; margin-top:16px; color:#6c757d; text-align:center;">
       📌 Cashier → Collection Desk | Treasurer → Pocket Money | Admin → Both
@@ -86,19 +95,37 @@
   <div id="mainScreen" class="hidden">
     <div class="topbar">
       <div class="app-title">💰 Cash Management</div>
-      <div style="display:flex; gap:12px;"><div class="user-pill"><span id="userDisplay">—</span><span id="userRoleBadge" style="margin-left:8px;"></span></div><button class="secondary-btn" id="logoutBtn">Logout</button></div>
+      <div style="display:flex; gap:12px;">
+        <div class="user-pill">
+          <span id="userDisplay">—</span>
+          <span id="userRoleBadge" style="margin-left:8px;"></span>
+        </div>
+        <button class="secondary-btn" id="logoutBtn">Logout</button>
+      </div>
     </div>
+
     <div id="mainAlert" class="alert"></div>
 
-    <div class="card"><div class="row"><div><label>📅 Working Date</label><input type="date" id="workDate"></div><div><button class="secondary-btn" id="refreshBtn" style="width:100%">⟳ Refresh</button></div></div></div>
+    <div class="card">
+      <div class="row">
+        <div>
+          <label>📅 Working Date</label>
+          <input type="date" id="workDate">
+        </div>
+        <div style="display:flex; align-items:end;">
+          <button class="secondary-btn" id="refreshBtn" style="width:100%">⟳ Refresh</button>
+        </div>
+      </div>
+    </div>
 
-    <div id="roleSelector" class="tabs" style="display: none;">
+    <div id="roleSelector" class="tabs" style="display:none;">
       <div class="tab active" data-role="collection">💰 Collection Desk</div>
       <div class="tab" data-role="pocket">👝 Pocket Money</div>
     </div>
+
     <div id="roleInfoBanner" class="role-banner hidden"></div>
 
-    <!-- COLLECTION SECTION (CASHIER) -->
+    <!-- COLLECTION SECTION -->
     <div id="collectionSection" class="hidden">
       <div class="section-card">
         <h3>📊 CASHIER SUMMARY</h3>
@@ -118,25 +145,30 @@
         <div class="tab active" data-collection-tab="salesTab">1. Sales & Cash Count</div>
         <div class="tab" data-collection-tab="depositTab">2. Bank Deposit</div>
         <div class="tab" data-collection-tab="loanTab">3. Employee Loan</div>
-        <div class="tab" data-collection-tab="creditTab">4. 💳 Credit / Debtors</div>
-        <div class="tab" data-collection-tab="searchTab">5. 🔍 Search</div>
+        <div class="tab" data-collection-tab="creditTab">4. Credit / Debtors</div>
+        <div class="tab" data-collection-tab="searchTab">5. Search</div>
       </div>
 
-      <!-- Sales & Cash Count Tab -->
       <div id="salesTab" class="card">
         <h3>📈 Record System Sales & Cash Counted</h3>
         <div class="row">
-          <div><label>Mauzo ya Mfumo (TZS)</label><input type="text" id="systemSalesAmount" placeholder="0"></div>
-          <div><label>Cash Iliyohesabiwa (TZS)</label><input type="text" id="cashCountAmount" placeholder="0"></div>
+          <div>
+            <label>Mauzo ya Mfumo (TZS)</label>
+            <input type="text" id="systemSalesAmount" placeholder="0">
+          </div>
+          <div>
+            <label>Cash Iliyohesabiwa (TZS)</label>
+            <input type="text" id="cashCountAmount" placeholder="0">
+          </div>
         </div>
+
         <div class="stat-box" style="margin-top:8px;">
           <div class="stat-label">Tofauti (Cash - System)</div>
           <div id="liveDiff" class="stat-value-orange" style="font-size:1.3rem;">TZS 0</div>
         </div>
-        
-        <!-- REASONS PANEL - Original behavior -->
+
         <div id="reasonsPanel" class="hidden" style="margin-top:18px; background:#fef9e6; border-radius:14px; padding:16px; border:1px solid #fde68a;">
-          <h4>📝 Eleza Sababu za Upungufu (shortage ≥ TZS 1,000)</h4>
+          <h4>📝 Eleza Sababu za Upungufu au Ziada (≥ TZS 1,000)</h4>
           <div id="reasonsList"></div>
           <button class="secondary-btn" id="addReasonBtn" style="margin-top:8px;">+ Ongeza sababu</button>
           <div id="reasonFeedback" style="font-size:12px; margin-top:8px; color:#b45309;"></div>
@@ -147,70 +179,142 @@
         <button class="primary-btn" id="saveCashSalesBtn" style="margin-top:8px;">✅ Hifadhi Mauzo & Cash</button>
       </div>
 
-      <!-- Bank Deposit Tab -->
       <div id="depositTab" class="card hidden">
         <h3>🏦 Bank Deposit (Office Cash)</h3>
-        <label>Kiasi cha Deposit (TZS)</label><input type="text" id="depositAmount" placeholder="0">
-        <label>Maelezo</label><input type="text" id="depositNote" placeholder="e.g., NMB slip">
+        <label>Kiasi cha Deposit (TZS)</label>
+        <input type="text" id="depositAmount" placeholder="0">
+        <label>Maelezo</label>
+        <input type="text" id="depositNote" placeholder="e.g., NMB slip">
         <button class="primary-btn" id="saveDepositBtn">💾 Save Deposit</button>
       </div>
 
-      <!-- Employee Loan Tab -->
       <div id="loanTab" class="card hidden">
         <h3>💵 Employee Loan Request</h3>
         <div class="row">
-          <div><label>Employee</label><select id="loanEmployee"><option value="">Chagua</option></select></div>
-          <div><label>Kiasi (TZS)</label><input type="text" id="loanAmount" placeholder="Kiasi"></div>
+          <div>
+            <label>Employee</label>
+            <select id="loanEmployee">
+              <option value="">Chagua</option>
+            </select>
+          </div>
+          <div>
+            <label>Kiasi (TZS)</label>
+            <input type="text" id="loanAmount" placeholder="Kiasi">
+          </div>
         </div>
-        <label>Sababu / Maelezo</label><input type="text" id="loanReason" placeholder="e.g., emergency">
+        <label>Sababu / Maelezo</label>
+        <input type="text" id="loanReason" placeholder="e.g., emergency">
         <button class="primary-btn" id="saveLoanBtn">📌 Hifadhi</button>
       </div>
 
-      <!-- CREDIT / DEBTOR MANAGEMENT TAB -->
       <div id="creditTab" class="card hidden">
         <h3>💳 Credit / Debtor Management</h3>
-        <p style="margin-bottom:16px; color:#6c757d; font-size:14px;">Track patients who owe money (Credit Note). When they pay later, record payment - it will be added to Office Cash.</p>
-        
+        <p style="margin-bottom:16px; color:#6c757d; font-size:14px;">
+          Track patients who owe money. When they pay later, record the payment here.
+        </p>
+
         <div class="row">
-          <div><label>Patient Name</label><input type="text" id="creditName" placeholder="Jina la mgonjwa"></div>
-          <div><label>Amount (TZS)</label><input type="text" id="creditAmount" placeholder="Kiasi anachodaiwa"></div>
+          <div>
+            <label>Patient Name</label>
+            <input type="text" id="creditName" placeholder="Jina la mgonjwa">
+          </div>
+          <div>
+            <label>Amount (TZS)</label>
+            <input type="text" id="creditAmount" placeholder="Kiasi anachodaiwa">
+          </div>
         </div>
+
         <div class="row">
-          <div><label>Service / Reason</label><input type="text" id="creditReason" placeholder="e.g., Lab test, Consultation"></div>
-          <div style="display:flex; align-items:end;"><button class="primary-btn" id="addCreditBtn" style="width:100%">➕ Record Credit (Anadai)</button></div>
+          <div>
+            <label>Service / Reason</label>
+            <input type="text" id="creditReason" placeholder="e.g., Lab test, Consultation">
+          </div>
+          <div style="display:flex; align-items:end;">
+            <button class="primary-btn" id="addCreditBtn" style="width:100%">➕ Record Credit</button>
+          </div>
         </div>
-        
+
         <div class="divider" style="margin:20px 0;"></div>
-        
-        <h4>📋 Active Debtors (Wanaodaiwa)</h4>
+
+        <h4>📋 Active Debtors</h4>
         <div id="creditsList" style="max-height:300px; overflow-y:auto; border:1px solid #e6e9ef; border-radius:10px; margin-top:10px;">
           <div style="padding:20px; text-align:center; color:#6c757d;">Loading debtors...</div>
         </div>
-        
+
         <div class="divider" style="margin:20px 0;"></div>
-        
+
         <h4>💰 Record Payment from Debtor</h4>
         <div class="row">
-          <div><label>Select Debtor</label><select id="paymentCreditSelect"><option value="">Select patient</option></select></div>
-          <div><label>Amount Paid (TZS)</label><input type="text" id="paymentCreditAmount" placeholder="Kiasi alicholipa"></div>
+          <div>
+            <label>Select Debtor</label>
+            <select id="paymentCreditSelect">
+              <option value="">Select patient</option>
+            </select>
+          </div>
+          <div>
+            <label>Amount Paid (TZS)</label>
+            <input type="text" id="paymentCreditAmount" placeholder="Kiasi alicholipa">
+          </div>
         </div>
         <div class="row">
-          <div><label>Payment Note</label><input type="text" id="paymentCreditNote" placeholder="e.g., Partial payment, M-pesa"></div>
-          <div style="display:flex; align-items:end;"><button class="success-btn" id="recordPaymentCreditBtn" style="width:100%">💰 Record Payment</button></div>
+          <div>
+            <label>Payment Note</label>
+            <input type="text" id="paymentCreditNote" placeholder="e.g., Partial payment, M-pesa">
+          </div>
+          <div style="display:flex; align-items:end;">
+            <button class="success-btn" id="recordPaymentCreditBtn" style="width:100%">💰 Record Payment</button>
+          </div>
         </div>
       </div>
 
-      <!-- Search Tab -->
       <div id="searchTab" class="card hidden">
         <h3>🔍 Tafuta Transactions</h3>
-        <div class="row"><div><label>Kuanzia</label><input type="date" id="searchDateFrom"></div><div><label>Mpaka</label><input type="date" id="searchDateTo"></div></div>
-        <div class="row"><div><label>Aina</label><select id="searchType"><option value="">Zote</option><option value="SYSTEM_SALES">System Sales</option><option value="CASH_COUNT">Cash Count</option><option value="CASH_REASON">Cash Reason</option><option value="DEPOSIT">Deposit</option><option value="EMPLOYEE_LOAN_REQUEST">Loan</option><option value="CREDIT_NOTE">Credit Note</option><option value="CREDIT_PAYMENT">Credit Payment</option></select></div><div><button class="primary-btn" id="searchBtn">🔍 Tafuta</button></div></div>
+        <div class="row">
+          <div><label>Kuanzia</label><input type="date" id="searchDateFrom"></div>
+          <div><label>Mpaka</label><input type="date" id="searchDateTo"></div>
+        </div>
+        <div class="row">
+          <div>
+            <label>Aina</label>
+            <select id="searchType">
+              <option value="">Zote</option>
+              <option value="SYSTEM_SALES">System Sales</option>
+              <option value="CASH_COUNT">Cash Count</option>
+              <option value="CASH_REASON">Cash Reason</option>
+              <option value="DEPOSIT">Deposit</option>
+              <option value="EMPLOYEE_LOAN_REQUEST">Loan</option>
+              <option value="CREDIT_NOTE">Credit Note</option>
+              <option value="CREDIT_PAYMENT">Credit Payment</option>
+            </select>
+          </div>
+          <div style="display:flex; align-items:end;">
+            <button class="primary-btn" id="searchBtn" style="width:100%">🔍 Tafuta</button>
+          </div>
+        </div>
+
         <button class="secondary-btn" id="exportSearchBtn" style="margin-top:10px; width:100%">📥 Export CSV</button>
-        <div id="searchResults" style="margin-top:20px; overflow-x:auto;"><table style="width:100%; border-collapse:collapse;"><thead style="background:#1e3a5f; color:white;"><tr><th>Tarehe</th><th>Aina</th><th>Kiasi</th><th>Maelezo</th><th>Cashier</th></tr></thead><tbody id="searchResultsBody"><tr><td colspan="5">Hakuna data</td></tr></tbody></table><div id="searchTotal" style="text-align:right; font-weight:800; margin-top:10px;"></div></div>
+
+        <div id="searchResults" style="margin-top:20px; overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Tarehe</th>
+                <th>Aina</th>
+                <th>Kiasi</th>
+                <th>Maelezo</th>
+                <th>Cashier</th>
+              </tr>
+            </thead>
+            <tbody id="searchResultsBody">
+              <tr><td colspan="5">Hakuna data</td></tr>
+            </tbody>
+          </table>
+          <div id="searchTotal" style="text-align:right; font-weight:800; margin-top:10px;"></div>
+        </div>
       </div>
     </div>
 
-    <!-- POCKET SECTION (Treasurer) -->
+    <!-- POCKET SECTION -->
     <div id="pocketSection" class="hidden">
       <div class="section-card">
         <h3>👝 POCKET MONEY DASHBOARD</h3>
@@ -227,266 +331,905 @@
         <div class="tab" data-pocket-tab="pocketSearchTab">🔍 Search</div>
       </div>
 
-      <div id="expenseTab" class="card"><h3>Record Matumizi (Pocket Money)</h3><div class="row"><div><label>Expense Category</label><select id="pocketExpenseCategory"><option value="">Select</option></select></div><div><label>Amount (TZS)</label><input type="text" id="pocketExpenseAmount"></div></div><div class="row"><div><label>Payment From</label><select id="pocketExpenseSource"><option value="POCKET">💰 Pocket Money</option><option value="SALES">📊 Mauzo</option><option value="DIRECTOR">👤 Director</option></select></div><div><label>Note</label><input type="text" id="pocketExpenseNote"></div></div><div class="row"><button class="secondary-btn" id="addExpenseToListBtn">➕ Add to List</button><button class="primary-btn" id="saveAllExpensesBtn" disabled>💾 Save All</button></div><div id="expenseListContainer" class="hidden"><div class="expense-list" id="expenseList"></div><div class="expense-total"><span>Total:</span><span id="expenseListTotal">TZS 0</span></div></div></div>
-      <div id="topupTab" class="card hidden"><h3>Pocket Top-up</h3><div class="row"><div><label>From</label><select id="pocketSource"><option value="SALES">💰 From Sales</option><option value="DIRECTOR">👤 Director</option></select></div><div><label>Amount (TZS)</label><input type="text" id="pocketTopupAmount"></div></div><label>Note</label><input type="text" id="pocketTopupNote"><button class="primary-btn" id="savePocketTopupBtn">Save</button></div>
-      <div id="pocketSearchTab" class="card hidden"><h3>🔍 Pocket Transactions</h3><div class="row"><div><label>From</label><input type="date" id="pocketSearchFrom"></div><div><label>To</label><input type="date" id="pocketSearchTo"></div></div><button class="primary-btn" id="pocketSearchBtn">Search</button><div id="pocketSearchResults" style="margin-top:20px;"><table style="width:100%; border-collapse:collapse;"><thead style="background:#1e3a5f; color:white;"><tr><th>Date</th><th>Type</th><th>Amount</th><th>Source</th><th>Note</th></tr></thead><tbody id="pocketSearchBody"><tr><td colspan="5">No data</td></tr></tbody></table><div id="pocketSearchTotal" style="text-align:right; font-weight:800;"></div></div></div>
+      <div id="expenseTab" class="card">
+        <h3>Record Matumizi (Pocket Money)</h3>
+        <div class="row">
+          <div>
+            <label>Expense Category</label>
+            <select id="pocketExpenseCategory">
+              <option value="">Select</option>
+            </select>
+          </div>
+          <div>
+            <label>Amount (TZS)</label>
+            <input type="text" id="pocketExpenseAmount">
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>Payment From</label>
+            <select id="pocketExpenseSource">
+              <option value="POCKET">💰 Pocket Money</option>
+              <option value="SALES">📊 Mauzo</option>
+              <option value="DIRECTOR">👤 Director</option>
+            </select>
+          </div>
+          <div>
+            <label>Note</label>
+            <input type="text" id="pocketExpenseNote">
+          </div>
+        </div>
+        <div class="row">
+          <button class="secondary-btn" id="addExpenseToListBtn">➕ Add to List</button>
+          <button class="primary-btn" id="saveAllExpensesBtn" disabled>💾 Save All</button>
+        </div>
+
+        <div id="expenseListContainer" class="hidden">
+          <div class="expense-list" id="expenseList"></div>
+          <div class="expense-total"><span>Total:</span><span id="expenseListTotal">TZS 0</span></div>
+        </div>
+      </div>
+
+      <div id="topupTab" class="card hidden">
+        <h3>Pocket Top-up</h3>
+        <div class="row">
+          <div>
+            <label>From</label>
+            <select id="pocketSource">
+              <option value="SALES">💰 From Sales</option>
+              <option value="DIRECTOR">👤 Director</option>
+            </select>
+          </div>
+          <div>
+            <label>Amount (TZS)</label>
+            <input type="text" id="pocketTopupAmount">
+          </div>
+        </div>
+        <label>Note</label>
+        <input type="text" id="pocketTopupNote">
+        <button class="primary-btn" id="savePocketTopupBtn">Save</button>
+      </div>
+
+      <div id="pocketSearchTab" class="card hidden">
+        <h3>🔍 Pocket Transactions</h3>
+        <div class="row">
+          <div><label>From</label><input type="date" id="pocketSearchFrom"></div>
+          <div><label>To</label><input type="date" id="pocketSearchTo"></div>
+        </div>
+        <button class="primary-btn" id="pocketSearchBtn">Search</button>
+
+        <div id="pocketSearchResults" style="margin-top:20px; overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Source</th>
+                <th>Note</th>
+              </tr>
+            </thead>
+            <tbody id="pocketSearchBody">
+              <tr><td colspan="5">No data</td></tr>
+            </tbody>
+          </table>
+          <div id="pocketSearchTotal" style="text-align:right; font-weight:800; margin-top:10px;"></div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzS65VR2IOqbcYwNUjtQnrwutJsPaV3Z1mskYYyuC87IAX1IZeM0mssYRiFwLGaTOOx/exec";
-  let currentUser = null, sessionToken = null, employeesList = [], categoriesList = [];
+
+  let currentUser = null;
+  let sessionToken = null;
+  let employeesList = [];
+  let categoriesList = [];
+  let expenseList = [];
   let dashboardCache = { data: null, timestamp: 0, CACHE_TTL: 30000 };
 
-  function setOverlay(show) { document.getElementById('loadingOverlay').classList.toggle('show', show); }
-  function digitsOnly(v) { return String(v || '').replace(/[^\d]/g, ''); }
-  function parseMoney(v) { const d = digitsOnly(v); return d ? Number(d) : 0; }
-  function formatNumber(n) { return Number(n || 0).toLocaleString('en-US'); }
-  function fmtInput(el) { if(!el) return; const d = digitsOnly(el.value); el.value = d ? Number(d).toLocaleString('en-US') : ''; }
-  function attachMoney(id) { const el = document.getElementById(id); if(el) el.addEventListener('input', () => fmtInput(el)); }
-  function showAlert(msg, type, target='main') { const el = document.getElementById(target === 'login' ? 'loginAlert' : 'mainAlert'); if(el) { el.textContent = msg; el.className = `alert show ${type}`; setTimeout(() => el.classList.remove('show'), 3000); } }
-
-  async function apiCall(action, payload={}, showLoader=false) {
-    if(showLoader) setOverlay(true);
-    try {
-      if(sessionToken) payload.token = sessionToken;
-      const body = new URLSearchParams({ action, ...payload });
-      const res = await fetch(SCRIPT_URL, { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body });
-      const data = JSON.parse(await res.text());
-      if(data.needLogin) { showAlert('Session expired', 'error'); logout(); return null; }
-      if(!data.success) throw new Error(data.error || 'Request failed');
-      return data;
-    } catch(e) { throw e; } finally { if(showLoader) setOverlay(false); }
+  function setOverlay(show) {
+    document.getElementById('loadingOverlay').classList.toggle('show', show);
   }
-  function makeRef() { return `${currentUser?.username || 'user'}-${Date.now()}-${Math.random().toString(36).substr(2,8)}`; }
-  async function addTx(date, type, category, amount, source, note) { return await apiCall('addTx', { date, type, category, amount:String(amount), source, note, cashier:currentUser?.username, ref:makeRef() }, true); }
 
-  function setTodayDate() { const today = new Date().toISOString().slice(0,10); const workDateInput = document.getElementById('workDate'); if(workDateInput && !workDateInput.value) workDateInput.value = today; return workDateInput?.value || today; }
+  function digitsOnly(v) {
+    return String(v || '').replace(/[^\d]/g, '');
+  }
 
-  async function refreshAllDashboards() {
+  function parseMoney(v) {
+    const d = digitsOnly(v);
+    return d ? Number(d) : 0;
+  }
+
+  function formatNumber(n) {
+    return Number(n || 0).toLocaleString('en-US');
+  }
+
+  function fmtInput(el) {
+    if (!el) return;
+    const d = digitsOnly(el.value);
+    el.value = d ? Number(d).toLocaleString('en-US') : '';
+  }
+
+  function attachMoney(id) {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', () => fmtInput(el));
+  }
+
+  function showAlert(msg, type, target = 'main') {
+    const el = document.getElementById(target === 'login' ? 'loginAlert' : 'mainAlert');
+    if (!el) return;
+    el.textContent = msg;
+    el.className = `alert show ${type}`;
+    setTimeout(() => el.classList.remove('show'), 3500);
+  }
+
+  async function apiCall(action, payload = {}, showLoader = false) {
+    if (showLoader) setOverlay(true);
+    try {
+      const finalPayload = { action, ...payload };
+      if (sessionToken) finalPayload.token = sessionToken;
+
+      const body = new URLSearchParams(finalPayload);
+      const res = await fetch(SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body
+      });
+
+      const text = await res.text();
+      const data = JSON.parse(text);
+
+      if (data.needLogin) {
+        showAlert('Session expired', 'error');
+        logout();
+        return null;
+      }
+
+      if (!data.success) throw new Error(data.error || 'Request failed');
+      return data;
+    } finally {
+      if (showLoader) setOverlay(false);
+    }
+  }
+
+  function makeRef() {
+    return `${currentUser?.username || 'user'}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  }
+
+  async function addTx(date, type, category, amount, source, note) {
+    return await apiCall('addTx', {
+      date,
+      type,
+      category,
+      amount: String(amount),
+      source,
+      note,
+      cashier: currentUser?.username || '',
+      ref: makeRef()
+    }, true);
+  }
+
+  function setTodayDate() {
+    const today = new Date().toISOString().slice(0, 10);
+    const workDateInput = document.getElementById('workDate');
+    if (workDateInput && !workDateInput.value) workDateInput.value = today;
+    return workDateInput?.value || today;
+  }
+
+  async function loadInitData() {
+    const date = document.getElementById('workDate').value;
+    const res = await apiCall('getInit', { date }, false);
+    employeesList = res.employees || [];
+    categoriesList = res.categories || [];
+
+    const loanSelect = document.getElementById('loanEmployee');
+    loanSelect.innerHTML = '<option value="">Chagua</option>';
+    employeesList.forEach(emp => {
+      loanSelect.innerHTML += `<option value="${escapeHtml(emp)}">${escapeHtml(emp)}</option>`;
+    });
+
+    const expenseCat = document.getElementById('pocketExpenseCategory');
+    expenseCat.innerHTML = '<option value="">Select</option>';
+    categoriesList.forEach(cat => {
+      expenseCat.innerHTML += `<option value="${escapeHtml(cat)}">${escapeHtml(cat)}</option>`;
+    });
+  }
+
+  async function refreshAllDashboards(force = false) {
     const date = document.getElementById('workDate')?.value;
-    if(!date) return;
+    if (!date) return;
+
     const now = Date.now();
-    if (dashboardCache.data && (now - dashboardCache.timestamp) < dashboardCache.CACHE_TTL) { renderDashboard(dashboardCache.data); return; }
+    if (!force && dashboardCache.data && (now - dashboardCache.timestamp) < dashboardCache.CACHE_TTL) {
+      renderDashboard(dashboardCache.data);
+      return;
+    }
+
     try {
       const dashData = await apiCall('getDashboard', { date }, false);
       const dash = dashData.dashboard || {};
-      const txData = await apiCall('searchTransactions', { fromDate: date, toDate: date, type: 'POCKET_TOPUP', source: '', category: '', system: 'POCKET' }, false);
-      const topups = (txData?.transactions || []).reduce((sum, t)
-const topups = (txData?.transactions || []).reduce((sum, t) => sum + (t.amount || 0), 0);
-      const expenses = await apiCall('searchTransactions', { fromDate: date, toDate: date, type: 'EXPENSE', source: '', category: '', system: 'POCKET' }, false);
-      const totalExpenses = (expenses?.transactions || []).reduce((sum, t) => sum + (t.amount || 0), 0);
-      
-      dashboardCache.data = { dash, topups: topups || 0, expenses: totalExpenses || 0 };
+
+      const txData = await apiCall('searchTransactions', {
+        fromDate: date,
+        toDate: date,
+        type: 'POCKET_TOPUP',
+        source: '',
+        category: '',
+        system: 'POCKET'
+      }, false);
+
+      const topups = (txData?.transactions || []).reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+
+      const expenses = await apiCall('searchTransactions', {
+        fromDate: date,
+        toDate: date,
+        type: 'EXPENSE',
+        source: '',
+        category: '',
+        system: 'POCKET'
+      }, false);
+
+      const totalExpenses = (expenses?.transactions || []).reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+
+      dashboardCache.data = {
+        dash,
+        topups,
+        expenses: totalExpenses
+      };
       dashboardCache.timestamp = now;
+
       renderDashboard(dashboardCache.data);
-    } catch(e) { console.error(e); showAlert('Error refreshing dashboard', 'error'); }
+    } catch (e) {
+      console.error(e);
+      showAlert(e.message || 'Error refreshing dashboard', 'error');
+    }
   }
 
   function renderDashboard(data) {
-    const dash = data.dash;
+    const dash = data.dash || {};
+
     document.getElementById('dashSystemSales').innerText = 'TZS ' + formatNumber(dash.systemSales || 0);
     document.getElementById('dashCashCounted').innerText = 'TZS ' + formatNumber(dash.cashCounted || 0);
-    const diff = (dash.cashCounted || 0) - (dash.systemSales || 0);
+
+    const diff = (Number(dash.cashCounted) || 0) - (Number(dash.systemSales) || 0);
     document.getElementById('dashDifference').innerText = 'TZS ' + formatNumber(diff);
     document.getElementById('dashPendingDeposit').innerText = 'TZS ' + formatNumber(dash.pendingDeposit || 0);
     document.getElementById('dashDirectorDebt').innerText = 'TZS ' + formatNumber(dash.directorDebt || 0);
-    const remaining = (dash.cashCounted || 0) - (dash.pendingDeposit || 0);
+
+    const remaining = (Number(dash.cashCounted) || 0) - (Number(dash.pendingDeposit) || 0);
     document.getElementById('dashRemainingOffice').innerText = 'TZS ' + formatNumber(remaining);
-    
-    if(document.getElementById('pocketBalance')) {
-      const pocketBalance = (dash.pocketBalance || 0) + data.topups - data.expenses;
-      document.getElementById('pocketBalance').innerText = 'TZS ' + formatNumber(pocketBalance);
-      document.getElementById('pocketTodayExpenses').innerText = 'TZS ' + formatNumber(data.expenses);
-      document.getElementById('pocketTopupsTotal').innerText = 'TZS ' + formatNumber(data.topups);
-    }
-    
+
+    const pocketBalance = (Number(dash.pocketClosing) || 0) + (Number(data.topups) || 0) - (Number(data.expenses) || 0);
+    document.getElementById('pocketBalance').innerText = 'TZS ' + formatNumber(pocketBalance);
+    document.getElementById('pocketTodayExpenses').innerText = 'TZS ' + formatNumber(data.expenses || 0);
+    document.getElementById('pocketTopupsTotal').innerText = 'TZS ' + formatNumber(data.topups || 0);
+
+    updateLiveDiff();
+  }
+
+  function updateLiveDiff() {
     const systemVal = parseMoney(document.getElementById('systemSalesAmount')?.value || '0');
     const cashVal = parseMoney(document.getElementById('cashCountAmount')?.value || '0');
     const liveDiff = cashVal - systemVal;
+
     document.getElementById('liveDiff').innerText = 'TZS ' + formatNumber(liveDiff);
-    if(Math.abs(liveDiff) >= 1000) document.getElementById('reasonsPanel').classList.remove('hidden');
-    else document.getElementById('reasonsPanel').classList.add('hidden');
+
+    if (Math.abs(liveDiff) >= 1000) {
+      document.getElementById('reasonsPanel').classList.remove('hidden');
+    } else {
+      document.getElementById('reasonsPanel').classList.add('hidden');
+      document.getElementById('reasonsList').innerHTML = '';
+      document.getElementById('reasonFeedback').innerText = '';
+    }
   }
 
-  async function loadEmployees() {
-    try {
-      const res = await apiCall('getEmployees', {}, false);
-      if(res.employees) {
-        employeesList = res.employees;
-        const loanSelect = document.getElementById('loanEmployee');
-        if(loanSelect) {
-          loanSelect.innerHTML = '<option value="">Chagua</option>';
-          employeesList.forEach(emp => loanSelect.innerHTML += `<option value="${emp.name}">${emp.name}</option>`);
-        }
-      }
-    } catch(e) { console.error('Error loading employees:', e); }
+  function addReasonField() {
+    const wrap = document.createElement('div');
+    wrap.className = 'reason-row';
+    wrap.innerHTML = `
+      <input type="text" class="reason-text" placeholder="Sababu ya tofauti">
+      <input type="text" class="reason-amount" placeholder="Kiasi">
+      <button type="button" class="danger-btn remove-reason">✖</button>
+    `;
+    document.getElementById('reasonsList').appendChild(wrap);
+
+    wrap.querySelector('.reason-amount').addEventListener('input', (e) => fmtInput(e.target));
+    wrap.querySelector('.remove-reason').addEventListener('click', () => wrap.remove());
   }
 
-  async function loadCategories() {
-    try {
-      const res = await apiCall('getCategories', {}, false);
-      if(res.categories) {
-        categoriesList = res.categories;
-        const expenseCat = document.getElementById('pocketExpenseCategory');
-        if(expenseCat) {
-          expenseCat.innerHTML = '<option value="">Select</option>';
-          categoriesList.forEach(cat => expenseCat.innerHTML += `<option value="${cat}">${cat}</option>`);
-        }
-      }
-    } catch(e) { console.error('Error loading categories:', e); }
+  function collectReasons() {
+    const rows = [...document.querySelectorAll('#reasonsList .reason-row')];
+    return rows.map(row => {
+      const text = row.querySelector('.reason-text')?.value?.trim() || '';
+      const amount = parseMoney(row.querySelector('.reason-amount')?.value || '0');
+      return { text, amount };
+    }).filter(r => r.text && r.amount > 0);
   }
 
   async function loadDebtors() {
-    const date = document.getElementById('workDate')?.value;
-    if(!date) return;
     try {
-      const res = await apiCall('getDebtors', { date }, false);
+      const res = await apiCall('getDebtors', {}, false);
       const debtors = res.debtors || [];
       const creditsList = document.getElementById('creditsList');
       const paymentSelect = document.getElementById('paymentCreditSelect');
-      
-      if(creditsList) {
-        if(debtors.length === 0) creditsList.innerHTML = '<div style="padding:20px; text-align:center; color:#6c757d;">No active debtors</div>';
-        else {
-          creditsList.innerHTML = '';
-          debtors.forEach(debtor => {
-            const div = document.createElement('div');
-            div.className = 'debtor-item';
-            div.innerHTML = `
-              <div><strong>${debtor.name}</strong><br><small>${debtor.reason || 'No reason'}</small></div>
-              <div><span class="credit-badge">Due: TZS ${formatNumber(debtor.amount)}</span></div>
-              <div><small>${debtor.date}</small></div>
-            `;
-            creditsList.appendChild(div);
-          });
-        }
+
+      if (debtors.length === 0) {
+        creditsList.innerHTML = '<div style="padding:20px; text-align:center; color:#6c757d;">No active debtors</div>';
+      } else {
+        creditsList.innerHTML = '';
+        debtors.forEach(debtor => {
+          const div = document.createElement('div');
+          div.className = 'debtor-item';
+          div.innerHTML = `
+            <div>
+              <strong>${escapeHtml(debtor.name)}</strong><br>
+              <small>Paid: TZS ${formatNumber(debtor.totalPaid || 0)} | Last cashier: ${escapeHtml(debtor.lastCashier || '-')}</small>
+            </div>
+            <div><span class="credit-badge">Due: TZS ${formatNumber(debtor.balance || 0)}</span></div>
+            <div><small>${formatDateDisplay(debtor.lastUpdated)}</small></div>
+          `;
+          creditsList.appendChild(div);
+        });
       }
-      
-      if(paymentSelect) {
-        paymentSelect.innerHTML = '<option value="">Select patient</option>';
-        debtors.forEach(debtor => paymentSelect.innerHTML += `<option value="${debtor.name}|${debtor.amount}">${debtor.name} (TZS ${formatNumber(debtor.amount)})</option>`);
-      }
-    } catch(e) { console.error('Error loading debtors:', e); }
+
+      paymentSelect.innerHTML = '<option value="">Select patient</option>';
+      debtors.forEach(debtor => {
+        paymentSelect.innerHTML += `<option value="${escapeHtml(debtor.name)}">${escapeHtml(debtor.name)} (TZS ${formatNumber(debtor.balance || 0)})</option>`;
+      });
+    } catch (e) {
+      console.error(e);
+      showAlert(e.message || 'Error loading debtors', 'error');
+    }
   }
 
-  let expenseList = [];
   function updateExpenseListUI() {
     const container = document.getElementById('expenseListContainer');
     const listEl = document.getElementById('expenseList');
     const totalEl = document.getElementById('expenseListTotal');
     const saveBtn = document.getElementById('saveAllExpensesBtn');
-    
-    if(expenseList.length === 0) {
+
+    if (expenseList.length === 0) {
       container.classList.add('hidden');
-      if(saveBtn) saveBtn.disabled = true;
+      saveBtn.disabled = true;
       return;
     }
-    
+
     container.classList.remove('hidden');
-    if(saveBtn) saveBtn.disabled = false;
-    
+    saveBtn.disabled = false;
+
     let total = 0;
     listEl.innerHTML = '';
+
     expenseList.forEach((exp, idx) => {
       total += exp.amount;
       const div = document.createElement('div');
       div.className = 'expense-item';
       div.innerHTML = `
         <div class="expense-details">
-          <div class="expense-category">${exp.category}</div>
-          <div><small>${exp.source} | ${exp.note || 'No note'}</small></div>
+          <div class="expense-category">${escapeHtml(exp.category)}</div>
+          <div><small>${escapeHtml(exp.source)} | ${escapeHtml(exp.note || 'No note')}</small></div>
         </div>
         <div class="expense-amount">TZS ${formatNumber(exp.amount)}</div>
         <button class="remove-expense" data-idx="${idx}">✖</button>
       `;
       listEl.appendChild(div);
     });
+
     totalEl.innerText = 'TZS ' + formatNumber(total);
-    
+
     document.querySelectorAll('.remove-expense').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const idx = parseInt(btn.dataset.idx);
+      btn.addEventListener('click', () => {
+        const idx = parseInt(btn.dataset.idx, 10);
         expenseList.splice(idx, 1);
         updateExpenseListUI();
       });
     });
   }
 
-  // Event Listeners setup
+  async function saveCashSales() {
+    const date = document.getElementById('workDate').value;
+    const systemSales = parseMoney(document.getElementById('systemSalesAmount').value);
+    const cashCount = parseMoney(document.getElementById('cashCountAmount').value);
+    const note = document.getElementById('cashCountNote').value.trim();
+
+    if (!date) return showAlert('Choose working date', 'error');
+    if (systemSales <= 0 && cashCount <= 0) return showAlert('Enter amount first', 'error');
+
+    try {
+      if (systemSales > 0) {
+        await addTx(date, 'SYSTEM_SALES', 'SALES', systemSales, 'OFFICE', note || 'System sales');
+      }
+      if (cashCount > 0) {
+        await addTx(date, 'CASH_COUNT', 'CASH_COUNT', cashCount, 'OFFICE', note || 'Cash counted');
+      }
+
+      const diff = cashCount - systemSales;
+      const reasons = collectReasons();
+
+      if (Math.abs(diff) >= 1000 && reasons.length) {
+        for (const r of reasons) {
+          await addTx(date, 'CASH_REASON', r.text, r.amount, 'OFFICE', `Reason: ${r.text}`);
+        }
+      }
+
+      try {
+        await apiCall('sendDifferenceAlert', {
+          date,
+          systemSales: String(systemSales),
+          cashCounted: String(cashCount),
+          difference: String(diff),
+          cashier: currentUser?.username || ''
+        }, false);
+      } catch (_) {}
+
+      document.getElementById('systemSalesAmount').value = '';
+      document.getElementById('cashCountAmount').value = '';
+      document.getElementById('cashCountNote').value = '';
+      document.getElementById('reasonsList').innerHTML = '';
+      updateLiveDiff();
+
+      dashboardCache.timestamp = 0;
+      await refreshAllDashboards(true);
+      showAlert('Sales and cash saved', 'success');
+    } catch (e) {
+      showAlert(e.message, 'error');
+    }
+  }
+
+  async function saveDeposit() {
+    const date = document.getElementById('workDate').value;
+    const amount = parseMoney(document.getElementById('depositAmount').value);
+    const note = document.getElementById('depositNote').value.trim();
+
+    if (!date) return showAlert('Choose working date', 'error');
+    if (amount <= 0) return showAlert('Enter deposit amount', 'error');
+
+    try {
+      await addTx(date, 'DEPOSIT', 'BANK_DEPOSIT', amount, 'OFFICE', note || 'Bank deposit');
+      document.getElementById('depositAmount').value = '';
+      document.getElementById('depositNote').value = '';
+      dashboardCache.timestamp = 0;
+      await refreshAllDashboards(true);
+      showAlert('Deposit saved', 'success');
+    } catch (e) {
+      showAlert(e.message, 'error');
+    }
+  }
+
+  async function saveLoan() {
+    const date = document.getElementById('workDate').value;
+    const employee = document.getElementById('loanEmployee').value;
+    const amount = parseMoney(document.getElementById('loanAmount').value);
+    const reason = document.getElementById('loanReason').value.trim();
+
+    if (!date) return showAlert('Choose working date', 'error');
+    if (!employee) return showAlert('Choose employee', 'error');
+    if (amount <= 0) return showAlert('Enter valid amount', 'error');
+
+    try {
+      await addTx(date, 'EMPLOYEE_LOAN_REQUEST', employee, amount, 'OFFICE', reason || 'Employee loan request');
+      document.getElementById('loanEmployee').value = '';
+      document.getElementById('loanAmount').value = '';
+      document.getElementById('loanReason').value = '';
+      showAlert('Loan request saved', 'success');
+    } catch (e) {
+      showAlert(e.message, 'error');
+    }
+  }
+
+  async function addCredit() {
+    const date = document.getElementById('workDate').value;
+    const debtorName = document.getElementById('creditName').value.trim();
+    const amount = parseMoney(document.getElementById('creditAmount').value);
+    const reason = document.getElementById('creditReason').value.trim();
+
+    if (!date) return showAlert('Choose working date', 'error');
+    if (!debtorName) return showAlert('Enter patient name', 'error');
+    if (amount <= 0) return showAlert('Enter valid amount', 'error');
+
+    try {
+      await apiCall('addCreditNote', {
+        date,
+        debtorName,
+        amount: String(amount),
+        reason,
+        cashier: currentUser?.username || ''
+      }, true);
+
+      document.getElementById('creditName').value = '';
+      document.getElementById('creditAmount').value = '';
+      document.getElementById('creditReason').value = '';
+      await loadDebtors();
+      showAlert('Credit note saved', 'success');
+    } catch (e) {
+      showAlert(e.message, 'error');
+    }
+  }
+
+  async function recordCreditPayment() {
+    const date = document.getElementById('workDate').value;
+    const debtorName = document.getElementById('paymentCreditSelect').value;
+    const amount = parseMoney(document.getElementById('paymentCreditAmount').value);
+    const note = document.getElementById('paymentCreditNote').value.trim();
+
+    if (!date) return showAlert('Choose working date', 'error');
+    if (!debtorName) return showAlert('Choose debtor', 'error');
+    if (amount <= 0) return showAlert('Enter valid amount', 'error');
+
+    try {
+      await apiCall('recordCreditPayment', {
+        date,
+        debtorName,
+        amount: String(amount),
+        note,
+        cashier: currentUser?.username || ''
+      }, true);
+
+      document.getElementById('paymentCreditSelect').value = '';
+      document.getElementById('paymentCreditAmount').value = '';
+      document.getElementById('paymentCreditNote').value = '';
+
+      dashboardCache.timestamp = 0;
+      await loadDebtors();
+      await refreshAllDashboards(true);
+      showAlert('Payment recorded', 'success');
+    } catch (e) {
+      showAlert(e.message, 'error');
+    }
+  }
+
+  function addExpenseToList() {
+    const category = document.getElementById('pocketExpenseCategory').value;
+    const amount = parseMoney(document.getElementById('pocketExpenseAmount').value);
+    const source = document.getElementById('pocketExpenseSource').value;
+    const note = document.getElementById('pocketExpenseNote').value.trim();
+
+    if (!category) return showAlert('Choose category', 'error');
+    if (amount <= 0) return showAlert('Enter valid amount', 'error');
+
+    expenseList.push({ category, amount, source, note });
+    document.getElementById('pocketExpenseCategory').value = '';
+    document.getElementById('pocketExpenseAmount').value = '';
+    document.getElementById('pocketExpenseSource').value = 'POCKET';
+    document.getElementById('pocketExpenseNote').value = '';
+    updateExpenseListUI();
+  }
+
+  async function saveAllExpenses() {
+    const date = document.getElementById('workDate').value;
+    if (!date) return showAlert('Choose working date', 'error');
+    if (!expenseList.length) return showAlert('No expenses to save', 'error');
+
+    try {
+      const payload = expenseList.map(item => ({
+        date,
+        type: 'EXPENSE',
+        category: item.category,
+        amount: item.amount,
+        source: item.source,
+        note: item.note,
+        cashier: currentUser?.username || '',
+        ref: makeRef()
+      }));
+
+      await apiCall('addBulkTx', {
+        transactions: JSON.stringify(payload)
+      }, true);
+
+      expenseList = [];
+      updateExpenseListUI();
+      dashboardCache.timestamp = 0;
+      await refreshAllDashboards(true);
+      showAlert('Expenses saved', 'success');
+    } catch (e) {
+      showAlert(e.message, 'error');
+    }
+  }
+
+  async function savePocketTopup() {
+    const date = document.getElementById('workDate').value;
+    const source = document.getElementById('pocketSource').value;
+    const amount = parseMoney(document.getElementById('pocketTopupAmount').value);
+    const note = document.getElementById('pocketTopupNote').value.trim();
+
+    if (!date) return showAlert('Choose working date', 'error');
+    if (amount <= 0) return showAlert('Enter valid amount', 'error');
+
+    try {
+      await addTx(date, 'POCKET_TOPUP', 'POCKET_TOPUP', amount, source, note || 'Pocket topup');
+      document.getElementById('pocketTopupAmount').value = '';
+      document.getElementById('pocketTopupNote').value = '';
+      dashboardCache.timestamp = 0;
+      await refreshAllDashboards(true);
+      showAlert('Pocket top-up saved', 'success');
+    } catch (e) {
+      showAlert(e.message, 'error');
+    }
+  }
+
+  async function searchTransactions() {
+    const fromDate = document.getElementById('searchDateFrom').value;
+    const toDate = document.getElementById('searchDateTo').value;
+    const type = document.getElementById('searchType').value;
+
+    try {
+      const res = await apiCall('searchTransactions', {
+        fromDate,
+        toDate,
+        type,
+        source: '',
+        category: '',
+        system: 'CASHIER'
+      }, true);
+
+      const rows = res.transactions || [];
+      const tbody = document.getElementById('searchResultsBody');
+      const totalEl = document.getElementById('searchTotal');
+
+      if (!rows.length) {
+        tbody.innerHTML = '<tr><td colspan="5">Hakuna data</td></tr>';
+        totalEl.innerText = '';
+        return;
+      }
+
+      let total = 0;
+      tbody.innerHTML = rows.map(r => {
+        total += Number(r.amount) || 0;
+        return `
+          <tr>
+            <td>${escapeHtml(r.date || '')}</td>
+            <td>${escapeHtml(r.type || '')}</td>
+            <td>TZS ${formatNumber(r.amount || 0)}</td>
+            <td>${escapeHtml(r.note || r.category || '')}</td>
+            <td>${escapeHtml(r.cashier || '')}</td>
+          </tr>
+        `;
+      }).join('');
+
+      totalEl.innerText = 'Total: TZS ' + formatNumber(total);
+    } catch (e) {
+      showAlert(e.message, 'error');
+    }
+  }
+
+  async function pocketSearch() {
+    const fromDate = document.getElementById('pocketSearchFrom').value;
+    const toDate = document.getElementById('pocketSearchTo').value;
+
+    try {
+      const res = await apiCall('searchTransactions', {
+        fromDate,
+        toDate,
+        type: '',
+        source: '',
+        category: '',
+        system: 'POCKET'
+      }, true);
+
+      const rows = res.transactions || [];
+      const tbody = document.getElementById('pocketSearchBody');
+      const totalEl = document.getElementById('pocketSearchTotal');
+
+      if (!rows.length) {
+        tbody.innerHTML = '<tr><td colspan="5">No data</td></tr>';
+        totalEl.innerText = '';
+        return;
+      }
+
+      let total = 0;
+      tbody.innerHTML = rows.map(r => {
+        total += Number(r.amount) || 0;
+        return `
+          <tr>
+            <td>${escapeHtml(r.date || '')}</td>
+            <td>${escapeHtml(r.type || '')}</td>
+            <td>TZS ${formatNumber(r.amount || 0)}</td>
+            <td>${escapeHtml(r.source || '')}</td>
+            <td>${escapeHtml(r.note || '')}</td>
+          </tr>
+        `;
+      }).join('');
+
+      totalEl.innerText = 'Total: TZS ' + formatNumber(total);
+    } catch (e) {
+      showAlert(e.message, 'error');
+    }
+  }
+
+  function exportSearch() {
+    const rows = [...document.querySelectorAll('#searchResultsBody tr')];
+    if (!rows.length || rows[0].children.length === 1) {
+      showAlert('No data to export', 'error');
+      return;
+    }
+
+    const csv = [
+      ['Date', 'Type', 'Amount', 'Note', 'Cashier'].join(','),
+      ...rows.map(row => [...row.children].map(td => `"${String(td.innerText).replace(/"/g, '""')}"`).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'cashier_search.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function login() {
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+
+    if (!username || !password) {
+      showAlert('Enter credentials', 'error', 'login');
+      return;
+    }
+
+    setOverlay(true);
+    try {
+      const res = await apiCall('login', { username, password }, false);
+      currentUser = res.user || { username };
+      sessionToken = res.token;
+
+      localStorage.setItem('clinicToken', sessionToken);
+      localStorage.setItem('clinicUser', JSON.stringify(currentUser));
+
+      document.getElementById('loginScreen').classList.add('hidden');
+      document.getElementById('mainScreen').classList.remove('hidden');
+      document.getElementById('userDisplay').innerText = currentUser.name || currentUser.username || username;
+
+      const role = String(currentUser.role || '').toUpperCase();
+      const roleBadge = document.getElementById('userRoleBadge');
+      roleBadge.innerText = role === 'ADMIN' ? '👑 Admin' : (role === 'CASHIER' ? '💰 Cashier' : '👝 Treasurer');
+
+      await afterLoginSetup(role);
+      showAlert('Login successful', 'success');
+    } catch (e) {
+      showAlert(e.message || 'Login failed', 'error', 'login');
+    } finally {
+      setOverlay(false);
+    }
+  }
+
+  async function afterLoginSetup(role) {
+    setTodayDate();
+    await loadInitData();
+    await refreshAllDashboards(true);
+
+    const roleSelector = document.getElementById('roleSelector');
+    const collectionSection = document.getElementById('collectionSection');
+    const pocketSection = document.getElementById('pocketSection');
+    const roleInfoBanner = document.getElementById('roleInfoBanner');
+
+    roleInfoBanner.classList.add('hidden');
+    roleSelector.style.display = 'none';
+    collectionSection.classList.add('hidden');
+    pocketSection.classList.add('hidden');
+
+    if (role === 'ADMIN') {
+      roleSelector.style.display = 'flex';
+      document.querySelector('[data-role="collection"]').click();
+    } else if (role === 'CASHIER') {
+      collectionSection.classList.remove('hidden');
+      roleInfoBanner.classList.remove('hidden');
+      roleInfoBanner.innerHTML = '💰 Working as: Cashier - Collection Desk Only';
+    } else {
+      pocketSection.classList.remove('hidden');
+      roleInfoBanner.classList.remove('hidden');
+      roleInfoBanner.innerHTML = '👝 Working as: Treasurer - Pocket Money Only';
+    }
+  }
+
+  function logout() {
+    localStorage.removeItem('clinicToken');
+    localStorage.removeItem('clinicUser');
+    sessionToken = null;
+    currentUser = null;
+    document.getElementById('mainScreen').classList.add('hidden');
+    document.getElementById('loginScreen').classList.remove('hidden');
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function formatDateDisplay(v) {
+    if (!v) return '-';
+    try {
+      const d = new Date(v);
+      if (isNaN(d.getTime())) return String(v);
+      return d.toLocaleString();
+    } catch {
+      return String(v);
+    }
+  }
+
   function setupEventListeners() {
-    // Login
     document.getElementById('loginBtn')?.addEventListener('click', login);
     document.getElementById('logoutBtn')?.addEventListener('click', logout);
-    document.getElementById('refreshBtn')?.addEventListener('click', () => { dashboardCache.timestamp = 0; refreshAllDashboards(); });
-    
-    // Cashier tabs
+
+    document.getElementById('refreshBtn')?.addEventListener('click', async () => {
+      dashboardCache.timestamp = 0;
+      await loadInitData();
+      await refreshAllDashboards(true);
+      await loadDebtors().catch(() => {});
+    });
+
     document.querySelectorAll('[data-collection-tab]').forEach(tab => {
       tab.addEventListener('click', () => {
         document.querySelectorAll('[data-collection-tab]').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
+
+        ['salesTab', 'depositTab', 'loanTab', 'creditTab', 'searchTab'].forEach(id => {
+          document.getElementById(id)?.classList.add('hidden');
+        });
+
         const tabId = tab.dataset.collectionTab;
-        document.getElementById('salesTab')?.classList.add('hidden');
-        document.getElementById('depositTab')?.classList.add('hidden');
-        document.getElementById('loanTab')?.classList.add('hidden');
-        document.getElementById('creditTab')?.classList.add('hidden');
-        document.getElementById('searchTab')?.classList.add('hidden');
-        if(tabId === 'salesTab') document.getElementById('salesTab')?.classList.remove('hidden');
-        else if(tabId === 'depositTab') document.getElementById('depositTab')?.classList.remove('hidden');
-        else if(tabId === 'loanTab') document.getElementById('loanTab')?.classList.remove('hidden');
-        else if(tabId === 'creditTab') { document.getElementById('creditTab')?.classList.remove('hidden'); loadDebtors(); }
-        else if(tabId === 'searchTab') document.getElementById('searchTab')?.classList.remove('hidden');
+        document.getElementById(tabId)?.classList.remove('hidden');
+
+        if (tabId === 'creditTab') loadDebtors();
       });
     });
-    
-    // Pocket tabs
+
     document.querySelectorAll('[data-pocket-tab]').forEach(tab => {
       tab.addEventListener('click', () => {
         document.querySelectorAll('[data-pocket-tab]').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
-        const tabId = tab.dataset.pocketTab;
-        document.getElementById('expenseTab')?.classList.add('hidden');
-        document.getElementById('topupTab')?.classList.add('hidden');
-        document.getElementById('pocketSearchTab')?.classList.add('hidden');
-        if(tabId === 'expenseTab') document.getElementById('expenseTab')?.classList.remove('hidden');
-        else if(tabId === 'topupTab') document.getElementById('topupTab')?.classList.remove('hidden');
-        else if(tabId === 'pocketSearchTab') document.getElementById('pocketSearchTab')?.classList.remove('hidden');
+
+        ['expenseTab', 'topupTab', 'pocketSearchTab'].forEach(id => {
+          document.getElementById(id)?.classList.add('hidden');
+        });
+
+        document.getElementById(tab.dataset.pocketTab)?.classList.remove('hidden');
       });
     });
-    
-    // Role selector
+
     document.querySelectorAll('[data-role]').forEach(role => {
       role.addEventListener('click', () => {
         document.querySelectorAll('[data-role]').forEach(r => r.classList.remove('active'));
         role.classList.add('active');
+
         const roleVal = role.dataset.role;
-        if(roleVal === 'collection') {
+        if (roleVal === 'collection') {
           document.getElementById('collectionSection')?.classList.remove('hidden');
           document.getElementById('pocketSection')?.classList.add('hidden');
         } else {
           document.getElementById('collectionSection')?.classList.add('hidden');
           document.getElementById('pocketSection')?.classList.remove('hidden');
-          refreshPocketData();
         }
       });
     });
-    
-    // Money input formatting
-    attachMoney('systemSalesAmount');
-    attachMoney('cashCountAmount');
-    attachMoney('depositAmount');
-    attachMoney('loanAmount');
-    attachMoney('creditAmount');
-    attachMoney('pocketExpenseAmount');
-    attachMoney('pocketTopupAmount');
-    attachMoney('paymentCreditAmount');
-    
-    // Live diff calculation
-    document.getElementById('systemSalesAmount')?.addEventListener('input', () => refreshAllDashboards());
-    document.getElementById('cashCountAmount')?.addEventListener('input', () => refreshAllDashboards());
-    
-    // Reasons
+
+    [
+      'systemSalesAmount',
+      'cashCountAmount',
+      'depositAmount',
+      'loanAmount',
+      'creditAmount',
+      'pocketExpenseAmount',
+      'pocketTopupAmount',
+      'paymentCreditAmount'
+    ].forEach(attachMoney);
+
+    document.getElementById('systemSalesAmount')?.addEventListener('input', updateLiveDiff);
+    document.getElementById('cashCountAmount')?.addEventListener('input', updateLiveDiff);
+
+    document.getElementById('workDate')?.addEventListener('change', async () => {
+      dashboardCache.timestamp = 0;
+      await loadInitData();
+      await refreshAllDashboards(true);
+      await loadDebtors().catch(() => {});
+    });
+
     document.getElementById('addReasonBtn')?.addEventListener('click', addReasonField);
     document.getElementById('saveCashSalesBtn')?.addEventListener('click', saveCashSales);
     document.getElementById('saveDepositBtn')?.addEventListener('click', saveDeposit);
@@ -498,321 +1241,40 @@ const topups = (txData?.transactions || []).reduce((sum, t) => sum + (t.amount |
     document.getElementById('addExpenseToListBtn')?.addEventListener('click', addExpenseToList);
     document.getElementById('saveAllExpensesBtn')?.addEventListener('click', saveAllExpenses);
     document.getElementById('savePocketTopupBtn')?.addEventListener('click', savePocketTopup);
-    document.getElementById('pocketSearchBtn')?.addEventListener('click', searchPocketTransactions);
-    
-    // Work date change
-    document.getElementById('workDate')?.addEventListener('change', () => { dashboardCache.timestamp = 0; refreshAllDashboards(); loadDebtors(); });
-  }
-  
-  let reasons = [];
-  function addReasonField() {
-    const idx = reasons.length;
-    reasons.push({ category: '', reason: '' });
-    const reasonsList = document.getElementById('reasonsList');
-    const div = document.createElement('div');
-    div.className = 'reason-row';
-    div.id = `reason-${idx}`;
-    div.innerHTML = `
-      <select id="reasonCat-${idx}"><option value="">Select category</option><option value="Petty Cash">Petty Cash</option><option value="Theft">Theft</option><option value="Error">Error</option><option value="Other">Other</option></select>
-      <input type="text" id="reasonText-${idx}" placeholder="Detailed reason">
-      <button class="secondary-btn" onclick="removeReason(${idx})">Remove</button>
-    `;
-    reasonsList.appendChild(div);
-  }
-  
-  window.removeReason = function(idx) {
-    reasons.splice(idx, 1);
-    document.getElementById(`reason-${idx}`)?.remove();
-    // Re-index remaining reasons
-    document.querySelectorAll('.reason-row').forEach((row, newIdx) => row.id = `reason-${newIdx}`);
-  };
-  
-  async function saveCashSales() {
-    const date = document.getElementById('workDate')?.value;
-    const systemSales = parseMoney(document.getElementById('systemSalesAmount')?.value);
-    const cashCounted = parseMoney(document.getElementById('cashCountAmount')?.value);
-    const note = document.getElementById('cashCountNote')?.value;
-    const diff = cashCounted - systemSales;
-    
-    if(!date) { showAlert('Please select date', 'error'); return; }
-    if(!systemSales && !cashCounted) { showAlert('Enter at least one value', 'error'); return; }
-    
-    const reasonsData = [];
-    if(Math.abs(diff) >= 1000) {
-      document.querySelectorAll('.reason-row').forEach((row, idx) => {
-        const cat = document.getElementById(`reasonCat-${idx}`)?.value;
-        const text = document.getElementById(`reasonText-${idx}`)?.value;
-        if(cat && text) reasonsData.push({ category: cat, reason: text });
-      });
-      if(reasonsData.length === 0 && diff < 0) { showAlert('Please provide reasons for shortage', 'error'); return; }
-    }
-    
-    try {
-      await apiCall('saveCashSales', { date, systemSales: String(systemSales), cashCounted: String(cashCounted), note, reasons: JSON.stringify(reasonsData) }, true);
-      showAlert('Saved successfully!', 'success');
-      dashboardCache.timestamp = 0;
-      refreshAllDashboards();
-      document.getElementById('systemSalesAmount').value = '';
-      document.getElementById('cashCountAmount').value = '';
-      document.getElementById('cashCountNote').value = '';
-      reasons = [];
-      document.getElementById('reasonsList').innerHTML = '';
-    } catch(e) { showAlert(e.message, 'error'); }
-  }
-  
-  async function saveDeposit() {
-    const date = document.getElementById('workDate')?.value;
-    const amount = parseMoney(document.getElementById('depositAmount')?.value);
-    const note = document.getElementById('depositNote')?.value;
-    if(!amount) { showAlert('Enter deposit amount', 'error'); return; }
-    try {
-      await apiCall('saveDeposit', { date, amount: String(amount), note }, true);
-      showAlert('Deposit recorded', 'success');
-      document.getElementById('depositAmount').value = '';
-      document.getElementById('depositNote').value = '';
-      refreshAllDashboards();
-    } catch(e) { showAlert(e.message, 'error'); }
-  }
-  
-  async function saveLoan() {
-    const date = document.getElementById('workDate')?.value;
-    const employee = document.getElementById('loanEmployee')?.value;
-    const amount = parseMoney(document.getElementById('loanAmount')?.value);
-    const reason = document.getElementById('loanReason')?.value;
-    if(!employee || !amount) { showAlert('Select employee and enter amount', 'error'); return; }
-    try {
-      await apiCall('saveLoan', { date, employee, amount: String(amount), reason }, true);
-      showAlert('Loan request saved', 'success');
-      document.getElementById('loanAmount').value = '';
-      document.getElementById('loanReason').value = '';
-    } catch(e) { showAlert(e.message, 'error'); }
-  }
-  
-  async function addCredit() {
-    const date = document.getElementById('workDate')?.value;
-    const name = document.getElementById('creditName')?.value;
-    const amount = parseMoney(document.getElementById('creditAmount')?.value);
-    const reason = document.getElementById('creditReason')?.value;
-    if(!name || !amount) { showAlert('Enter patient name and amount', 'error'); return; }
-    try {
-      await apiCall('addCredit', { date, name, amount: String(amount), reason }, true);
-      showAlert('Credit recorded', 'success');
-      document.getElementById('creditName').value = '';
-      document.getElementById('creditAmount').value = '';
-      document.getElementById('creditReason').value = '';
-      loadDebtors();
-    } catch(e) { showAlert(e.message, 'error'); }
-  }
-  
-  async function recordCreditPayment() {
-    const date = document.getElementById('workDate')?.value;
-    const selection = document.getElementById('paymentCreditSelect')?.value;
-    const amount = parseMoney(document.getElementById('paymentCreditAmount')?.value);
-    const note = document.getElementById('paymentCreditNote')?.value;
-    if(!selection || !amount) { showAlert('Select debtor and enter amount', 'error'); return; }
-    const [name, originalAmount] = selection.split('|');
-    try {
-      await apiCall('recordCreditPayment', { date, name, amount: String(amount), note, originalAmount }, true);
-      showAlert('Payment recorded', 'success');
-      document.getElementById('paymentCreditAmount').value = '';
-      document.getElementById('paymentCreditNote').value = '';
-      loadDebtors();
-      refreshAllDashboards();
-    } catch(e) { showAlert(e.message, 'error'); }
-  }
-  
-  async function searchTransactions() {
-    const fromDate = document.getElementById('searchDateFrom')?.value;
-    const toDate = document.getElementById('searchDateTo')?.value;
-    const type = document.getElementById('searchType')?.value;
-    if(!fromDate || !toDate) { showAlert('Select date range', 'error'); return; }
-    try {
-      const res = await apiCall('searchTransactions', { fromDate, toDate, type }, true);
-      const transactions = res.transactions || [];
-      const tbody = document.getElementById('searchResultsBody');
-      let total = 0;
-      if(transactions.length === 0) tbody.innerHTML = '<tr><td colspan="5">No data found</td></tr>';
-      else {
-        tbody.innerHTML = '';
-        transactions.forEach(tx => {
-          total += tx.amount || 0;
-          tbody.innerHTML += `<tr><td>${tx.date}</td><td>${tx.type}</td><td>TZS ${formatNumber(tx.amount)}</td><td>${tx.note || '-'}</td><td>${tx.cashier || '-'}</td></tr>`;
-        });
-      }
-      document.getElementById('searchTotal').innerHTML = `<strong>Total: TZS ${formatNumber(total)}</strong>`;
-    } catch(e) { showAlert(e.message, 'error'); }
-  }
-  
-  function exportSearch() {
-    const table = document.querySelector('#searchResults table');
-    if(!table) return;
-    let csv = [];
-    const rows = table.querySelectorAll('tr');
-    rows.forEach(row => {
-      const cols = row.querySelectorAll('td, th');
-      const rowData = Array.from(cols).map(col => `"${col.innerText.replace(/"/g, '""')}"`).join(',');
-      csv.push(rowData);
+    document.getElementById('pocketSearchBtn')?.addEventListener('click', pocketSearch);
+
+    document.getElementById('password')?.addEventListener('keydown', e => {
+      if (e.key === 'Enter') login();
     });
-    const blob = new Blob([csv.join('\n')], { type: 'text/csv' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `transactions_${new Date().toISOString().slice(0,19)}.csv`;
-    link.click();
-    URL.revokeObjectURL(link.href);
   }
-  
-  function addExpenseToList() {
-    const category = document.getElementById('pocketExpenseCategory')?.value;
-    const amount = parseMoney(document.getElementById('pocketExpenseAmount')?.value);
-    const source = document.getElementById('pocketExpenseSource')?.value;
-    const note = document.getElementById('pocketExpenseNote')?.value;
-    if(!category || !amount) { showAlert('Select category and enter amount', 'error'); return; }
-    expenseList.push({ category, amount, source, note });
-    updateExpenseListUI();
-    document.getElementById('pocketExpenseCategory').value = '';
-    document.getElementById('pocketExpenseAmount').value = '';
-    document.getElementById('pocketExpenseNote').value = '';
-  }
-  
-  async function saveAllExpenses() {
-    if(expenseList.length === 0) return;
-    const date = document.getElementById('workDate')?.value;
+
+  async function autoLoginIfPossible() {
+    const savedToken = localStorage.getItem('clinicToken');
+    const savedUser = localStorage.getItem('clinicUser');
+    if (!savedToken || !savedUser) return;
+
     try {
-      await apiCall('saveExpenses', { date, expenses: JSON.stringify(expenseList) }, true);
-      showAlert('Expenses saved successfully', 'success');
-      expenseList = [];
-      updateExpenseListUI();
-      refreshAllDashboards();
-    } catch(e) { showAlert(e.message, 'error'); }
-  }
-  
-  async function savePocketTopup() {
-    const date = document.getElementById('workDate')?.value;
-    const source = document.getElementById('pocketSource')?.value;
-    const amount = parseMoney(document.getElementById('pocketTopupAmount')?.value);
-    const note = document.getElementById('pocketTopupNote')?.value;
-    if(!amount) { showAlert('Enter amount', 'error'); return; }
-    try {
-      await apiCall('savePocketTopup', { date, source, amount: String(amount), note }, true);
-      showAlert('Top-up recorded', 'success');
-      document.getElementById('pocketTopupAmount').value = '';
-      document.getElementById('pocketTopupNote').value = '';
-      refreshAllDashboards();
-    } catch(e) { showAlert(e.message, 'error'); }
-  }
-  
-  async function searchPocketTransactions() {
-    const fromDate = document.getElementById('pocketSearchFrom')?.value;
-    const toDate = document.getElementById('pocketSearchTo')?.value;
-    if(!fromDate || !toDate) { showAlert('Select date range', 'error'); return; }
-    try {
-      const res = await apiCall('searchPocketTransactions', { fromDate, toDate }, true);
-      const transactions = res.transactions || [];
-      const tbody = document.getElementById('pocketSearchBody');
-      let total = 0;
-      if(transactions.length === 0) tbody.innerHTML = '<tr><td colspan="5">No data found</td></tr>';
-      else {
-        tbody.innerHTML = '';
-        transactions.forEach(tx => {
-          total += tx.type === 'EXPENSE' ? -tx.amount : tx.amount;
-          tbody.innerHTML += `<tr><td>${tx.date}</td><td>${tx.type}</td><td>TZS ${formatNumber(tx.amount)}</td><td>${tx.source || '-'}</td><td>${tx.note || '-'}</td></tr>`;
-        });
-      }
-      document.getElementById('pocketSearchTotal').innerHTML = `<strong>Balance Change: TZS ${formatNumber(total)}</strong>`;
-    } catch(e) { showAlert(e.message, 'error'); }
-  }
-  
-  async function refreshPocketData() {
-    const date = document.getElementById('workDate')?.value;
-    if(!date) return;
-    try {
-      const dashData = await apiCall('getDashboard', { date }, false);
-      const dash = dashData.dashboard || {};
-      const txData = await apiCall('searchTransactions', { fromDate: date, toDate: date, type: 'POCKET_TOPUP', source: '', category: '', system: 'POCKET' }, false);
-      const topups = (txData?.transactions || []).reduce((sum, t) => sum + (t.amount || 0), 0);
-      const expenses = await apiCall('searchTransactions', { fromDate: date, toDate: date, type: 'EXPENSE', source: '', category: '', system: 'POCKET' }, false);
-      const totalExpenses = (expenses?.transactions || []).reduce((sum, t) => sum + (t.amount || 0), 0);
-      const pocketBalance = (dash.pocketBalance || 0) + topups - totalExpenses;
-      document.getElementById('pocketBalance').innerText = 'TZS ' + formatNumber(pocketBalance);
-      document.getElementById('pocketTodayExpenses').innerText = 'TZS ' + formatNumber(totalExpenses);
-      document.getElementById('pocketTopupsTotal').innerText = 'TZS ' + formatNumber(topups);
-    } catch(e) { console.error(e); }
-  }
-  
-  async function login() {
-    const username = document.getElementById('username').value.trim();
-    const password = document.getElementById('password').value;
-    if(!username || !password) { showAlert('Enter credentials', 'error', 'login'); return; }
-    setOverlay(true);
-    try {
-      const res = await apiCall('login', { username, password }, false);
-      if(res.success) {
-        currentUser = { username, role: res.role };
-        sessionToken = res.token;
-        localStorage.setItem('clinicToken', sessionToken);
-        localStorage.setItem('clinicUser', JSON.stringify(currentUser));
-        document.getElementById('loginScreen').classList.add('hidden');
-        document.getElementById('mainScreen').classList.remove('hidden');
-        document.getElementById('userDisplay').innerText = username;
-        const roleBadge = document.getElementById('userRoleBadge');
-        roleBadge.innerText = res.role === 'ADMIN' ? '👑 Admin' : (res.role === 'CASHIER' ? '💰 Cashier' : '👝 Treasurer');
-        
-        // Show appropriate sections based on role
-        const roleSelector = document.getElementById('roleSelector');
-        const collectionSection = document.getElementById('collectionSection');
-        const pocketSection = document.getElementById('pocketSection');
-        
-        if(res.role === 'ADMIN') {
-          roleSelector.style.display = 'flex';
-          document.querySelector('[data-role="collection"]').click();
-        } else if(res.role === 'CASHIER') {
-          roleSelector.style.display = 'none';
-          collectionSection.classList.remove('hidden');
-          pocketSection.classList.add('hidden');
-          document.getElementById('roleInfoBanner').classList.remove('hidden');
-          document.getElementById('roleInfoBanner').innerHTML = '💰 Working as: Cashier - Collection Desk Only';
-        } else if(res.role === 'TREASURER') {
-          roleSelector.style.display = 'none';
-          collectionSection.classList.add('hidden');
-          pocketSection.classList.remove('hidden');
-          document.getElementById('roleInfoBanner').classList.remove('hidden');
-          document.getElementById('roleInfoBanner').innerHTML = '👝 Working as: Treasurer - Pocket Money Only';
-          refreshPocketData();
-        }
-        
-        setTodayDate();
-        await loadEmployees();
-        await loadCategories();
-        await refreshAllDashboards();
-        await loadDebtors();
-        setupEventListeners();
-      } else showAlert(res.error || 'Login failed', 'error', 'login');
-    } catch(e) { showAlert(e.message, 'error', 'login'); } finally { setOverlay(false); }
-  }
-  
-  function logout() {
-    currentUser = null;
-    sessionToken = null;
-    localStorage.removeItem('clinicToken');
-    localStorage.removeItem('clinicUser');
-    document.getElementById('loginScreen').classList.remove('hidden');
-    document.getElementById('mainScreen').classList.add('hidden');
-    document.getElementById('username').value = '';
-    document.getElementById('password').value = '';
-  }
-  
-  function checkAutoLogin() {
-    const token = localStorage.getItem('clinicToken');
-    const user = localStorage.getItem('clinicUser');
-    if(token && user) {
-      sessionToken = token;
-      currentUser = JSON.parse(user);
-      login();
+      sessionToken = savedToken;
+      currentUser = JSON.parse(savedUser);
+      document.getElementById('loginScreen').classList.add('hidden');
+      document.getElementById('mainScreen').classList.remove('hidden');
+      document.getElementById('userDisplay').innerText = currentUser.name || currentUser.username || '-';
+
+      const role = String(currentUser.role || '').toUpperCase();
+      const roleBadge = document.getElementById('userRoleBadge');
+      roleBadge.innerText = role === 'ADMIN' ? '👑 Admin' : (role === 'CASHIER' ? '💰 Cashier' : '👝 Treasurer');
+
+      await afterLoginSetup(role);
+    } catch {
+      logout();
     }
   }
-  
-  // Initialize
-  checkAutoLogin();
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    setupEventListeners();
+    setTodayDate();
+    await autoLoginIfPossible();
+  });
 </script>
 </body>
 </html>
