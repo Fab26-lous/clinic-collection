@@ -1,394 +1,508 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>Matumizi Clinic | Fast Cash Management</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cashier System | Live Shortage Reduction</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: "Segoe UI", Roboto, sans-serif; background: #f4f6f9; padding: 24px; color: #2c3e50; }
-    .container { max-width: 1200px; margin: auto; }
-    .app-title { font-size: 1.6rem; font-weight: 700; color: #1e3a5f; margin-bottom: 18px; }
-    .card { background:#fff; border-radius:14px; padding:22px; margin-bottom:18px; box-shadow:0 4px 12px rgba(0,0,0,0.05); border:1px solid #e6e9ef; }
-    h3 { font-size: 1.1rem; margin-bottom: 14px; font-weight: 700; color: #1e3a5f; }
-    label { display:block; font-size:.85rem; color:#555; margin:8px 0 4px; font-weight:500; }
-    input, select, textarea { width:100%; padding:12px; margin-bottom:12px; border:1px solid #dcdfe6; border-radius:10px; font-size:15px; background:#fafbfc; }
-    input:focus, select:focus, textarea:focus { outline:none; border-color:#1e3a5f; background:#fff; }
-    button { padding:12px 16px; border-radius:10px; border:none; font-weight:700; font-size:15px; cursor:pointer; transition:all .2s; }
-    button:active { transform: translateY(1px); }
-    .primary-btn { background:#1e3a5f; color:#fff; }
-    .secondary-btn { background:#e9edf3; color:#1e3a5f; }
-    .row { display:grid; grid-template-columns: 1fr 1fr; gap:14px; }
-    .row-3 { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:14px; }
-    .tabs { display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap; }
-    .tab { flex:1; min-width:120px; padding:12px; border-radius:10px; border:1px solid #dcdfe6; background:#f5f7fa; cursor:pointer; font-weight:800; text-align:center; }
-    .tab.active { background:#1e3a5f; color:white; border-color:#1e3a5f; }
-    .hidden { display:none; }
-    .alert { padding:12px 14px; border-radius:10px; margin:0 0 12px; display:none; font-weight:700; }
-    .alert.show { display:block; }
-    .alert.success { background:#e6f4ea; color:#1e7e34; }
-    .alert.error { background:#fdecea; color:#b02a37; }
-    /* ENHANCED STAT BOXES - LARGER & BOLDER NUMBERS */
-    .stat-box { background:#f8fafc; padding:18px 12px; border-radius:16px; text-align:center; border:1px solid #e6e9ef; transition: all 0.2s; }
-    .stat-label { font-size:0.85rem; font-weight:600; color:#4a627a; letter-spacing:0.3px; margin-bottom:10px; text-transform:uppercase; }
-    .stat-value { font-size:1.8rem; font-weight:800; color:#1e3a5f; line-height:1.2; }
-    .stat-value-green { font-size:1.8rem; font-weight:800; color:#10b981; }
-    .stat-value-red { font-size:1.8rem; font-weight:800; color:#b02a37; }
-    .stat-value-orange { font-size:1.8rem; font-weight:800; color:#f59e0b; }
-    .section-card { background:#fff; border-radius:14px; padding:20px; margin-bottom:20px; border-left:4px solid #1e3a5f; box-shadow:0 2px 8px rgba(0,0,0,0.03); }
-    .badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; margin-left: 10px; background: #eef2ff; color: #1e3a5f; }
-    .topbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px; }
-    .user-pill { background:#f5f7fa; border:1px solid #dcdfe6; padding:8px 12px; border-radius:999px; font-weight:800; color:#1e3a5f; }
-    .overlay { position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:9999; }
-    .overlay.show { display:flex; }
-    .overlay-card { background:#fff; border-radius:14px; padding:18px; text-align:center; }
-    .spinner { width:42px; height:42px; border-radius:50%; border:4px solid #e5e7eb; border-top-color:#1e3a5f; margin:0 auto 12px; animation:spin .9s linear infinite; }
-    @keyframes spin { to { transform:rotate(360deg); } }
-    .reason-row { display:flex; gap:10px; align-items:center; background:#fff; border:1px solid #e6e9ef; padding:10px; border-radius:10px; margin-bottom:8px; flex-wrap:wrap; }
-    .reason-row select, .reason-row input { margin:0; flex:1; }
-    .expense-list { margin:15px 0; max-height:300px; overflow-y:auto; border:1px solid #e6e9ef; border-radius:10px; }
-    .expense-item { display:flex; justify-content:space-between; align-items:center; padding:12px; border-bottom:1px solid #eef1f5; }
-    .expense-item:last-child { border-bottom:none; }
-    .expense-details { flex:1; }
-    .expense-category { font-weight:700; color:#1e3a5f; }
-    .expense-amount { font-weight:800; margin:0 15px; min-width:100px; text-align:right; }
-    .remove-expense { color:#b02a37; background:none; border:none; font-size:1.2rem; cursor:pointer; }
-    .expense-total { display:flex; justify-content:space-between; align-items:center; padding:15px; background:#f8fafc; border-radius:0 0 10px 10px; font-weight:800; border-top:2px solid #1e3a5f; }
-    .role-banner { background: #1e3a5f10; border-radius: 12px; padding: 8px 16px; margin-bottom: 16px; font-weight: 600; font-size: 0.85rem; border-left: 3px solid #1e3a5f; }
-    @media (max-width: 640px) { 
-      body{padding:14px;} 
-      .row, .row-3 { grid-template-columns:1fr; }
-      .tabs { flex-direction:column; }
-      .stat-value, .stat-value-green, .stat-value-red, .stat-value-orange { font-size:1.5rem; }
-    }
+    body { font-family: 'Segoe UI', Roboto, sans-serif; background: #f0f4f9; padding: 20px; color: #1e293b; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .card { background: white; border-radius: 20px; padding: 22px; margin-bottom: 20px; border: 1px solid #e2e8f0; }
+    .app-title { font-size: 1.6rem; font-weight: 800; color: #0f3b5f; }
+    .subtitle { color: #5b6e8c; font-size: 0.85rem; margin-bottom: 12px; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 20px; }
+    .user-pill { background: #f1f5f9; border-radius: 40px; padding: 8px 18px; font-weight: 700; }
+    .row { display: grid; grid-template-columns: repeat(2,1fr); gap: 18px; }
+    .row-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+    .row-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
+    label { display: block; font-size: 0.75rem; font-weight: 800; color: #334155; margin: 8px 0 4px; }
+    input, select { width: 100%; padding: 12px 14px; border: 1px solid #cbd5e1; border-radius: 14px; }
+    input:focus, select:focus { outline: none; border-color: #0f3b5f; }
+    button { border: none; border-radius: 40px; padding: 10px 20px; font-weight: 700; cursor: pointer; }
+    .primary-btn { background: #0f3b5f; color: white; }
+    .secondary-btn { background: #eef2ff; color: #0f3b5f; border: 1px solid #e2e8f0; }
+    .danger-btn { background: #b91c1c; color: white; }
+    .tabs { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+    .tab { background: #f1f5f9; border-radius: 40px; padding: 8px 24px; font-weight: 800; cursor: pointer; }
+    .tab.active { background: #0f3b5f; color: white; }
+    .hidden { display: none !important; }
+    .alert { padding: 12px 18px; border-radius: 18px; margin-bottom: 16px; display: none; }
+    .alert.show { display: block; }
+    .alert.success { background: #e6f7ec; color: #0b5e2e; }
+    .alert.error { background: #fee9e6; color: #b91c1c; }
+    .stat-box { background: #fafcff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 16px; text-align: center; }
+    .stat-value { font-size: 1.5rem; font-weight: 800; color: #0f3b5f; }
+    .stat-value.warning { color: #d97706; }
+    .stat-value.success { color: #0f7b4e; }
+    .section-title { font-size: 1.1rem; font-weight: 800; color: #0f3b5f; margin-bottom: 16px; border-left: 4px solid #0f3b5f; padding-left: 12px; }
+    .diff-panel { background: #f8fafc; border-radius: 20px; padding: 16px; text-align: center; margin-top: 12px; }
+    .shortage-badge { display: inline-block; padding: 6px 14px; border-radius: 40px; font-weight: 800; margin-top: 8px; }
+    .shortage-badge.warning { background: #fef3c7; color: #b45309; }
+    .shortage-badge.success { background: #e6f7ec; color: #0b5e2e; }
+    .reason-row { background: #fefaf5; border-radius: 16px; padding: 12px; margin-bottom: 12px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; border: 1px solid #fde68a; }
+    .reason-row select { flex: 2; min-width: 140px; }
+    .reason-row .reasonOther { flex: 2; display: none; }
+    .reason-row .reasonAmount { flex: 1; min-width: 120px; }
+    .reason-row .removeReasonBtn { background: #fee2e2; color: #b91c1c; padding: 10px 16px; }
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 9999; }
+    .overlay.show { display: flex; }
+    .overlay-card { background: white; border-radius: 28px; padding: 24px; text-align: center; }
+    .spinner { width: 40px; height: 40px; border: 3px solid #e2e8f0; border-top-color: #0f3b5f; border-radius: 50%; margin: 0 auto 12px; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+    th, td { padding: 10px 8px; border-bottom: 1px solid #edf2f7; text-align: left; }
+    th { background: #0f3b5f; color: white; }
+    @media (max-width: 780px) { .row, .row-3, .row-4 { grid-template-columns: 1fr; } .reason-row { flex-direction: column; } }
   </style>
 </head>
 <body>
-<div id="loadingOverlay" class="overlay"><div class="overlay-card"><div class="spinner"></div><div>Processing...</div></div></div>
+<div id="loadingOverlay" class="overlay"><div class="overlay-card"><div class="spinner"></div><div id="loadingTitle">Please wait…</div></div></div>
 
 <div class="container">
-  <div id="loginScreen" class="card" style="max-width:480px; margin:40px auto;">
-    <div class="app-title">🏥 Clinic Cash Management</div>
+  <div id="loginScreen" class="card" style="max-width: 460px; margin: 60px auto;">
+    <div class="app-title">💰 Cashier Collection</div>
     <div id="loginAlert" class="alert"></div>
-    <label>Username</label><input type="text" id="username" placeholder="Username" autocomplete="off">
-    <label>Password</label><input type="password" id="password" placeholder="Password" autocomplete="off">
-    <button class="primary-btn" id="loginBtn" style="width:100%">Login</button>
-    <div style="font-size:12px; margin-top:16px; color:#6c757d; text-align:center;">
-      📌 Cashier → Collection Desk | Treasurer → Pocket Money | Admin → Both
-    </div>
+    <label>Username</label><input type="text" id="username">
+    <label>Password</label><input type="password" id="password">
+    <button class="primary-btn" id="loginBtn" style="width:100%; margin-top:16px;">Login</button>
   </div>
 
   <div id="mainScreen" class="hidden">
-    <div class="topbar">
-      <div class="app-title">💰 Cash Management</div>
-      <div style="display:flex; gap:12px;"><div class="user-pill"><span id="userDisplay">—</span><span id="userRoleBadge" style="margin-left:8px;"></span></div><button class="secondary-btn" id="logoutBtn">Logout</button></div>
-    </div>
+    <div class="topbar"><div><div class="app-title">🏦 Cashier System</div><div class="subtitle">Lipa Mpesa → amount only, reduces shortage LIVE</div></div><div class="user-pill" id="userDisplay">—</div></div>
     <div id="mainAlert" class="alert"></div>
 
-    <div class="card"><div class="row"><div><label>📅 Working Date</label><input type="date" id="workDate"></div><div><button class="secondary-btn" id="refreshBtn" style="width:100%">⟳ Refresh</button></div></div></div>
+    <div class="card"><div class="row"><div><label>Working Date</label><input type="date" id="workDate"></div><div><button class="secondary-btn" id="refreshBtn" style="width:100%;">Refresh</button></div></div></div>
 
-    <div id="roleSelector" class="tabs" style="display: none;">
-      <div class="tab active" data-role="collection">💰 Collection Desk</div>
-      <div class="tab" data-role="pocket">👝 Pocket Money</div>
-    </div>
-    <div id="roleInfoBanner" class="role-banner hidden"></div>
-
-    <!-- COLLECTION SECTION -->
-    <div id="collectionSection" class="hidden">
-      <div class="section-card">
-        <h3>📊 CASHIER SUMMARY</h3>
-        <div class="row-3">
-          <div class="stat-box"><div class="stat-label">💻 System Sales</div><div class="stat-value" id="dashSystemSales">TZS 0</div></div>
-          <div class="stat-box"><div class="stat-label">💰 Cash Counted</div><div class="stat-value-green" id="dashCashCounted">TZS 0</div></div>
-          <div class="stat-box"><div class="stat-label">⚖️ Difference</div><div class="stat-value-orange" id="dashDifference">TZS 0</div></div>
-        </div>
-        <div class="row-3" style="margin-top:12px;">
-          <div class="stat-box"><div class="stat-label">🏦 Bank Deposits</div><div class="stat-value" id="dashPendingDeposit">TZS 0</div></div>
-          <div class="stat-box"><div class="stat-label">👤 Director Debt</div><div class="stat-value-red" id="dashDirectorDebt">TZS 0</div></div>
-          <div class="stat-box" style="background:#eef2ff;"><div class="stat-label">🏷️ Remaining Office Cash</div><div class="stat-value" id="dashRemainingOffice" style="color:#0f5c3f;">TZS 0</div></div>
-        </div>
+    <!-- Dashboard -->
+    <div class="card"><div class="section-title">Dashboard</div>
+      <div class="row-4">
+        <div class="stat-box"><div class="stat-label">Office Cash</div><div class="stat-value" id="dashOffice">TZS 0</div></div>
+        <div class="stat-box"><div class="stat-label">Counted Cash</div><div class="stat-value success" id="dashCounted">TZS 0</div></div>
+        <div class="stat-box"><div class="stat-label">System Sales</div><div class="stat-value" id="dashSystemSales">TZS 0</div></div>
+        <div class="stat-box"><div class="stat-label">Difference</div><div class="stat-value warning" id="dashDiff">TZS 0</div></div>
       </div>
-
-      <div class="tabs">
-        <div class="tab active" data-collection-tab="salesTab">1. Sales & Cash</div>
-        <div class="tab" data-collection-tab="depositTab">2. Bank Deposit</div>
-        <div class="tab" data-collection-tab="loanTab">3. Employee Loan</div>
-        <div class="tab" data-collection-tab="searchTab">4. Search</div>
-      </div>
-
-      <div id="salesTab" class="card">
-        <h3>Record System Sales & Cash</h3>
-        <div class="row"><div><label>System Sales (TZS)</label><input type="text" id="systemSalesAmount"></div><div><label>Cash Counted (TZS)</label><input type="text" id="cashCountAmount"></div></div>
-        <div class="stat-box"><div class="stat-label">Difference</div><div id="liveDiff" class="stat-value-orange" style="font-size:1.4rem;">TZS 0</div></div>
-        <div id="reasonsPanel" class="hidden" style="margin-top:18px; background:#fef9e6; border-radius:14px; padding:16px;"><h4>📝 Explain Shortage (≥ TZS 1,000)</h4><div id="reasonsList"></div><button class="secondary-btn" id="addReasonBtn">+ Add Reason</button><div id="reasonFeedback" style="font-size:12px; margin-top:8px;"></div></div>
-        <label>Note (optional)</label><input type="text" id="cashCountNote"><button class="primary-btn" id="saveCashSalesBtn" style="margin-top:8px;">✅ Save</button>
-      </div>
-      <div id="depositTab" class="card hidden"><h3>Bank Deposit (Office Cash)</h3><label>Amount (TZS)</label><input type="text" id="depositAmount"><label>Note</label><input type="text" id="depositNote"><button class="primary-btn" id="saveDepositBtn">Save Deposit</button></div>
-      <div id="loanTab" class="card hidden"><h3>Employee Loan Request</h3><div class="row"><div><label>Employee</label><select id="loanEmployee"><option value="">Select</option></select></div><div><label>Amount (TZS)</label><input type="text" id="loanAmount"></div></div><label>Reason</label><input type="text" id="loanReason"><button class="primary-btn" id="saveLoanBtn">Save Loan</button></div>
-      <div id="searchTab" class="card hidden"><h3>🔍 Search Transactions</h3><div class="row"><div><label>From Date</label><input type="date" id="searchDateFrom"></div><div><label>To Date</label><input type="date" id="searchDateTo"></div></div><div class="row"><div><label>Type</label><select id="searchType"><option value="">All</option><option value="SYSTEM_SALES">System Sales</option><option value="CASH_COUNT">Cash Count</option><option value="CASH_REASON">Cash Reason</option><option value="DEPOSIT">Deposit</option><option value="EMPLOYEE_LOAN_REQUEST">Loan</option></select></div><div><button class="primary-btn" id="searchBtn">Search</button></div></div><button class="secondary-btn" id="exportSearchBtn">Export CSV</button><div id="searchResults" style="margin-top:20px; overflow-x:auto;"><table style="width:100%; border-collapse:collapse;"><thead style="background:#1e3a5f; color:white;"><tr><th>Date</th><th>Type</th><th>Amount</th><th>Note</th><th>Cashier</th></tr></thead><tbody id="searchResultsBody"><tr><td colspan="5">No data</td></tr></tbody></table><div id="searchTotal" style="text-align:right; font-weight:800; margin-top:10px;"></div></div></div>
     </div>
 
-    <!-- POCKET SECTION -->
-    <div id="pocketSection" class="hidden">
-      <div class="section-card">
-        <h3>👝 POCKET MONEY DASHBOARD</h3>
-        <div class="row-3">
-          <div class="stat-box"><div class="stat-label">💰 Pocket Balance</div><div class="stat-value-green" id="pocketBalance">TZS 0</div></div>
-          <div class="stat-box"><div class="stat-label">📉 Today's Expenses</div><div class="stat-value-orange" id="pocketTodayExpenses">TZS 0</div></div>
-          <div class="stat-box"><div class="stat-label">➕ Top-ups Today</div><div class="stat-value" id="pocketTopupsTotal">TZS 0</div></div>
-        </div>
+    <div class="tabs"><button id="tabCashCount" class="tab active">1. Cash Count + Reasons</button><button id="tabDeposit" class="tab">2. Bank Deposit</button><button id="tabSearch" class="tab">3. Search</button></div>
+
+    <!-- CASH COUNT TAB with LIVE reduction -->
+    <div id="cashCountTab" class="card">
+      <div class="section-title">📊 Mauzo ya Mfumo vs Cash Count</div>
+      <div class="row">
+        <div><label>Mauzo ya Mfumo (TZS)</label><input type="text" id="systemSalesAmount" placeholder="System sales"></div>
+        <div><label>Cash Iliyohesabiwa (TZS)</label><input type="text" id="cashCountAmount" placeholder="Physical cash"></div>
+      </div>
+      
+      <div class="diff-panel">
+        <div class="stat-label">📉 TOFAUTI (Cash - Mauzo)</div>
+        <div class="stat-value" id="cashVsSalesDiff" style="font-size: 2rem;">TZS 0</div>
+        <div id="shortageStatus" class="shortage-badge"></div>
+        <div id="reductionInfo" class="subtitle" style="margin-top: 8px;"></div>
       </div>
 
-      <div class="tabs">
-        <div class="tab active" data-pocket-tab="expenseTab">💰 Record Expense</div>
-        <div class="tab" data-pocket-tab="topupTab">➕ Top-up Pocket</div>
-        <div class="tab" data-pocket-tab="pocketSearchTab">🔍 Search</div>
+      <!-- REASONS BOX - appears ONLY when shortage >= 1000 -->
+      <div id="reasonsBox" class="hidden" style="margin-top: 24px; background: #fefaf5; border-radius: 20px; padding: 18px;">
+        <div class="section-title" style="font-size: 1rem;">⚙️ Sababu za Upungufu (hupunguza tofauti LIVE)</div>
+        <div id="reasonsList"></div>
+        <button class="secondary-btn" id="addReasonBtn" style="width:100%; margin-top: 12px;">+ Ongeza Sababu</button>
+        <div class="subtitle" style="margin-top: 12px; font-size: 0.7rem;">💡 <strong>Lipa Mpesa:</strong> Kiasi pekee, hakuna sababu ya maandishi. <strong>Other:</strong> lazima uandike sababu.</div>
       </div>
 
-      <div id="expenseTab" class="card"><h3>Record Matumizi (Pocket Money)</h3><div class="row"><div><label>Expense Category</label><select id="pocketExpenseCategory"><option value="">Select</option></select></div><div><label>Amount (TZS)</label><input type="text" id="pocketExpenseAmount"></div></div><div class="row"><div><label>Payment From</label><select id="pocketExpenseSource"><option value="POCKET">💰 Pocket Money</option><option value="SALES">📊 Mauzo (Direct)</option><option value="DIRECTOR">👤 Director (Atadai)</option></select></div><div><label>Note</label><input type="text" id="pocketExpenseNote"></div></div><div class="row"><button class="secondary-btn" id="addExpenseToListBtn">➕ Add to List</button><button class="primary-btn" id="saveAllExpensesBtn" disabled>💾 Save All</button></div><div id="expenseListContainer" class="hidden"><div class="expense-list" id="expenseList"></div><div class="expense-total"><span>Total:</span><span id="expenseListTotal">TZS 0</span></div></div></div>
-      <div id="topupTab" class="card hidden"><h3>Pocket Top-up</h3><div class="row"><div><label>From</label><select id="pocketSource"><option value="SALES">💰 From Sales</option><option value="DIRECTOR">👤 Director Cash</option></select></div><div><label>Amount (TZS)</label><input type="text" id="pocketTopupAmount"></div></div><label>Note</label><input type="text" id="pocketTopupNote"><button class="primary-btn" id="savePocketTopupBtn">Save Top-up</button></div>
-      <div id="pocketSearchTab" class="card hidden"><h3>🔍 Pocket Transactions</h3><div class="row"><div><label>From</label><input type="date" id="pocketSearchFrom"></div><div><label>To</label><input type="date" id="pocketSearchTo"></div></div><button class="primary-btn" id="pocketSearchBtn">Search</button><div id="pocketSearchResults" style="margin-top:20px;"><table style="width:100%; border-collapse:collapse;"><thead style="background:#1e3a5f; color:white;"><tr><th>Date</th><th>Type</th><th>Amount</th><th>Source</th><th>Note</th></tr></thead><tbody id="pocketSearchBody"><tr><td colspan="5">No data</td></tr></tbody></table><div id="pocketSearchTotal" style="text-align:right; font-weight:800;"></div></div></div>
+      <label>Maelezo</label>
+      <input type="text" id="cashCountNote" placeholder="Optional note">
+      <button class="primary-btn" id="saveCashAndSalesBtn" style="margin-top: 18px;">💾 Save Cash & System Sales</button>
+    </div>
+
+    <!-- DEPOSIT TAB -->
+    <div id="depositTab" class="card hidden">
+      <div class="section-title">🏦 Bank Deposit</div>
+      <div class="row"><div><label>Deposit from Office</label><input type="text" id="depositOffice"></div><div><label>Cash to Director</label><input type="text" id="depositDirector"></div></div>
+      <label>Maelezo</label><input type="text" id="depositNote">
+      <button class="primary-btn" id="saveDepositBtn" style="margin-top:16px;">Save Deposit</button>
+    </div>
+
+    <!-- SEARCH TAB -->
+    <div id="searchTab" class="card hidden">
+      <div class="section-title">🔍 Tafuta</div>
+      <div class="row-3"><div><label>Kuanzia</label><input type="date" id="searchDateFrom"></div><div><label>Mpaka</label><input type="date" id="searchDateTo"></div><div><label>Aina</label><select id="searchType"><option value="">Zote</option><option value="CASH_COUNT">Cash Count</option><option value="CASH_REASON">Reasons</option><option value="DEPOSIT">Deposit</option></select></div></div>
+      <button class="primary-btn" id="searchBtn" style="width:100%;">Tafuta</button>
+      <div id="searchWrap" style="margin-top:16px;"><table><thead><tr><th>Tarehe</th><th>Aina</th><th>Category</th><th>Kiasi</th><th>Chanzo</th><th>Maelezo</th></tr></thead><tbody id="searchResultsBody"><tr><td colspan="6" style="text-align:center;">Bonyeza Tafuta</td></tr></tbody></table></div>
+      <div id="searchSummary" style="text-align:right; font-weight:800; margin-top:12px;"></div>
     </div>
   </div>
 </div>
 
 <script>
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzS65VR2IOqbcYwNUjtQnrwutJsPaV3Z1mskYYyuC87IAX1IZeM0mssYRiFwLGaTOOx/exec";
-  let currentUser = null, sessionToken = null, employeesList = [], categoriesList = [];
-  let dashboardCache = { data: null, timestamp: 0, CACHE_TTL: 30000 };
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzS65VR2IOqbcYwNUjtQnrwutJsPaV3Z1mskYYyuC87IAX1IZeM0mssYRiFwLGaTOOx/exec";
+let currentUser = null, sessionToken = null;
 
-  function setOverlay(show) { document.getElementById('loadingOverlay').classList.toggle('show', show); }
-  function digitsOnly(v) { return String(v || '').replace(/[^\d]/g, ''); }
-  function parseMoney(v) { const d = digitsOnly(v); return d ? Number(d) : 0; }
-  function formatNumber(n) { return Number(n || 0).toLocaleString('en-US'); }
-  function fmtInput(el) { if(!el) return; const d = digitsOnly(el.value); el.value = d ? Number(d).toLocaleString('en-US') : ''; }
-  function attachMoney(id) { const el = document.getElementById(id); if(el) el.addEventListener('input', () => fmtInput(el)); }
-  function showAlert(msg, type, target='main') { 
-    const el = document.getElementById(target === 'login' ? 'loginAlert' : 'mainAlert'); 
-    if(el) { el.textContent = msg; el.className = `alert show ${type}`; setTimeout(() => el.classList.remove('show'), 3000); }
-  }
+function $(id) { return document.getElementById(id); }
+function setOverlay(show, title=''){ $('loadingTitle').textContent = title; $('loadingOverlay').classList.toggle('show', show); }
+function showAlert(msg, type, target='main'){ 
+  const el = target === 'login' ? $('loginAlert') : $('mainAlert');
+  el.className = `alert show ${type}`; el.textContent = msg;
+  setTimeout(() => el.classList.remove('show'), 3500);
+}
+function todayISO(){ let d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function formatNumber(n){ return (Number(n)||0).toLocaleString('en-US'); }
+function parseMoney(v){ return Number(String(v||'').replace(/[^\d]/g,'')||0); }
+function fmtTZS(n){ return `TZS ${formatNumber(n)}`; }
 
-  async function apiCall(action, payload={}, showLoader=false) {
-    if(showLoader) setOverlay(true);
-    try {
-      if(sessionToken) payload.token = sessionToken;
-      const body = new URLSearchParams({ action, ...payload });
-      const res = await fetch(SCRIPT_URL, { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body });
-      const data = JSON.parse(await res.text());
-      if(data.needLogin) { showAlert('Session expired', 'error'); logout(); return null; }
-      if(!data.success) throw new Error(data.error || 'Request failed');
-      return data;
-    } catch(e) { throw e; } finally { if(showLoader) setOverlay(false); }
-  }
-  function makeRef() { return `${currentUser?.username || 'user'}-${Date.now()}-${Math.random().toString(36).substr(2,8)}`; }
-  async function addTx(date, type, category, amount, source, note) { return await apiCall('addTx', { date, type, category, amount:String(amount), source, note, cashier:currentUser?.username, ref:makeRef() }, true); }
-  async function addBulkTx(transactions) { return await apiCall('addBulkTx', { transactions: JSON.stringify(transactions) }, true); }
+async function apiCall(action, payload, auth=true, title=''){
+  setOverlay(true, title);
+  try {
+    const body = new URLSearchParams({ action, token: auth ? sessionToken : '', ...payload });
+    const res = await fetch(SCRIPT_URL, { method:'POST', body });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || 'Failed');
+    return data;
+  } finally { setOverlay(false); }
+}
 
-  // Set today's date automatically (no more previous day bug)
-  function setTodayDate() {
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, '0');
-    const dd = String(today.getDate()).padStart(2, '0');
-    const todayStr = `${yyyy}-${mm}-${dd}`;
-    const workDateInput = document.getElementById('workDate');
-    if(workDateInput && !workDateInput.value) {
-      workDateInput.value = todayStr;
-    }
-    return workDateInput ? workDateInput.value : todayStr;
-  }
+async function loadInit(date){
+  const data = await apiCall('getInit', { date, system:'CASHIER' }, true, 'Loading...');
+  renderDashboard(data.dashboard || {});
+}
+function renderDashboard(d){
+  $('dashOffice').textContent = fmtTZS(d.officeCash || 0);
+  $('dashCounted').textContent = fmtTZS(d.cashCounted || 0);
+  $('dashSystemSales').textContent = fmtTZS(d.systemSales || 0);
+  $('dashDiff').textContent = fmtTZS(d.difference || 0);
+}
+function setActiveTab(tab){
+  ['CashCount','Deposit','Search'].forEach(t => {
+    $(`tab${t}`).classList.toggle('active', t===tab);
+    $(`${t.toLowerCase()}Tab`).classList.toggle('hidden', t!==tab);
+  });
+}
 
-  async function refreshAllDashboards() {
-    const date = document.getElementById('workDate')?.value;
-    if(!date) return;
+// ============ CORE LOGIC: LIVE REDUCTION ============
+// Calculate total reduction from ALL valid reasons (Lipa Mpesa + Other with text)
+function getTotalReduction() {
+  let total = 0;
+  const rows = document.querySelectorAll('#reasonsList .reason-row');
+  for (let row of rows) {
+    const typeSel = row.querySelector('.reasonType');
+    const otherInp = row.querySelector('.reasonOther');
+    const amountInp = row.querySelector('.reasonAmount');
+    if (!typeSel || !amountInp) continue;
+    const reasonType = typeSel.value;
+    let amount = parseMoney(amountInp.value);
+    if (amount <= 0) continue;
     
-    const now = Date.now();
-    if (dashboardCache.data && (now - dashboardCache.timestamp) < dashboardCache.CACHE_TTL) {
-      renderDashboard(dashboardCache.data);
+    // Lipa Mpesa: always valid (no text needed)
+    if (reasonType === 'Lipa Mpesa') {
+      total += amount;
+    }
+    // Other: only valid if text is provided
+    else if (reasonType === 'Other') {
+      const otherText = otherInp ? otherInp.value.trim() : '';
+      if (otherText !== '') total += amount;
+    }
+  }
+  return total;
+}
+
+// This function updates the UI live as user types amounts or adds reasons
+function updateLiveDifference() {
+  const system = parseMoney($('systemSalesAmount').value);
+  const counted = parseMoney($('cashCountAmount').value);
+  let rawDiff = counted - system;
+  const absRaw = Math.abs(rawDiff);
+  const isShortage = (rawDiff < 0 && absRaw >= 1000);
+  
+  const reasonsBox = $('reasonsBox');
+  
+  if (isShortage) {
+    reasonsBox.classList.remove('hidden');
+    // Auto-add first reason row if empty
+    if (document.querySelectorAll('#reasonsList .reason-row').length === 0) {
+      addReasonRow();
+    }
+    
+    // Get total reduction from reasons
+    const reduction = getTotalReduction();
+    let remainingShortage = absRaw - reduction;
+    if (remainingShortage < 0) remainingShortage = 0;
+    
+    // Display the remaining shortage (this is what still needs to be explained)
+    const effectiveDiff = -remainingShortage;
+    $('cashVsSalesDiff').textContent = fmtTZS(effectiveDiff);
+    
+    if (remainingShortage <= 0) {
+      $('shortageStatus').className = 'shortage-badge success';
+      $('shortageStatus').textContent = '✅ Upungufu umefunikwa kabisa!';
+      $('reductionInfo').innerHTML = `Sababu zimepunguza TZS ${formatNumber(reduction)}`;
+    } else {
+      $('shortageStatus').className = 'shortage-badge warning';
+      $('shortageStatus').textContent = `⚠️ Bado upungufu: TZS ${formatNumber(remainingShortage)}`;
+      $('reductionInfo').innerHTML = `Sababu zimepunguza TZS ${formatNumber(reduction)}. Ongeza zaidi.`;
+    }
+  } else {
+    reasonsBox.classList.add('hidden');
+    $('cashVsSalesDiff').textContent = fmtTZS(rawDiff);
+    if (rawDiff < 0 && absRaw < 1000) {
+      $('shortageStatus').className = 'shortage-badge success';
+      $('shortageStatus').textContent = '✓ Upungufu mdogo (<1000) hauhitaji sababu';
+      $('reductionInfo').innerHTML = '';
+    } else {
+      $('shortageStatus').className = 'shortage-badge success';
+      $('shortageStatus').textContent = rawDiff >= 0 ? '✓ Hakuna upungufu' : '';
+      $('reductionInfo').innerHTML = '';
+    }
+    // Clear reasons list when no shortage
+    $('reasonsList').innerHTML = '';
+  }
+}
+
+function addReasonRow() {
+  const container = $('reasonsList');
+  const div = document.createElement('div');
+  div.className = 'reason-row';
+  div.innerHTML = `
+    <select class="reasonType">
+      <option value="">Chagua Sababu</option>
+      <option value="Lipa Mpesa">💸 Lipa Mpesa</option>
+      <option value="Other">📝 Other</option>
+    </select>
+    <input type="text" class="reasonOther" placeholder="Sababu (kwa Other)" style="display:none;">
+    <input type="text" class="reasonAmount" placeholder="Kiasi (TZS)">
+    <button type="button" class="removeReasonBtn secondary-btn" style="background:#fee2e2;">✖</button>
+  `;
+  
+  const typeSel = div.querySelector('.reasonType');
+  const otherInp = div.querySelector('.reasonOther');
+  const amountInp = div.querySelector('.reasonAmount');
+  const removeBtn = div.querySelector('.removeReasonBtn');
+  
+  // Toggle Other input visibility
+  typeSel.addEventListener('change', () => {
+    otherInp.style.display = typeSel.value === 'Other' ? 'block' : 'none';
+    updateLiveDifference();
+  });
+  
+  amountInp.addEventListener('input', () => {
+    let amt = parseMoney(amountInp.value);
+    amountInp.value = amt ? formatNumber(amt) : '';
+    updateLiveDifference();
+  });
+  
+  otherInp.addEventListener('input', () => updateLiveDifference());
+  
+  removeBtn.addEventListener('click', () => {
+    div.remove();
+    updateLiveDifference();
+  });
+  
+  container.appendChild(div);
+  updateLiveDifference();
+}
+
+function collectReasons() {
+  const reasons = [];
+  const rows = document.querySelectorAll('#reasonsList .reason-row');
+  for (let row of rows) {
+    const typeSel = row.querySelector('.reasonType');
+    const otherInp = row.querySelector('.reasonOther');
+    const amountInp = row.querySelector('.reasonAmount');
+    if (!typeSel) continue;
+    const reasonType = typeSel.value;
+    let amount = parseMoney(amountInp?.value);
+    if (amount <= 0) continue;
+    
+    if (reasonType === 'Lipa Mpesa') {
+      reasons.push({ category: 'Lipa Mpesa', amount, note: 'Lipa Mpesa payment' });
+    }
+    else if (reasonType === 'Other') {
+      const otherText = otherInp?.value.trim();
+      if (otherText) reasons.push({ category: otherText, amount, note: 'Other expense' });
+    }
+  }
+  return reasons;
+}
+
+async function saveCashAndSales() {
+  const btn = $('saveCashAndSalesBtn');
+  btn.disabled = true;
+  try {
+    const date = $('workDate').value;
+    const systemAmount = parseMoney($('systemSalesAmount').value);
+    const cashAmount = parseMoney($('cashCountAmount').value);
+    const note = $('cashCountNote').value.trim();
+    
+    if (!date) throw new Error('Chagua tarehe');
+    if (systemAmount <= 0) throw new Error('Weka mauzo ya mfumo');
+    if (cashAmount <= 0) throw new Error('Weka cash iliyohesabiwa');
+    
+    const rawDiff = cashAmount - systemAmount;
+    const absDiff = Math.abs(rawDiff);
+    const isShortage = (rawDiff < 0 && absDiff >= 1000);
+    
+    const transactions = [];
+    
+    // Add system sales record
+    transactions.push({
+      date, type: 'CASH_COUNT', category: 'System Sales', amount: systemAmount,
+      source: 'SYSTEM', note: `System: ${note}`, cashier: currentUser?.username
+    });
+    
+    // Add cash count record
+    transactions.push({
+      date, type: 'CASH_COUNT', category: 'Cash Counted', amount: cashAmount,
+      source: 'OFFICE', note: `Cash: ${note}`, cashier: currentUser?.username
+    });
+    
+    // Handle shortage reasons
+    if (isShortage) {
+      const reasons = collectReasons();
+      const totalReduction = reasons.reduce((s,r)=>s+r.amount,0);
+      const remaining = absDiff - totalReduction;
+      
+      if (remaining > 0) {
+        throw new Error(`Upungufu haujaelezwa kabisa! Bado TZS ${formatNumber(remaining)}. Ongeza sababu za kutosha.`);
+      }
+      
+      for (let r of reasons) {
+        transactions.push({
+          date, type: 'CASH_REASON', category: r.category, amount: r.amount,
+          source: 'REASON', note: r.note, cashier: currentUser?.username
+        });
+      }
+    }
+    
+    // Save all transactions
+    await apiCall('addBulkTx', { transactions: JSON.stringify(transactions) }, true, 'Saving...');
+    
+    // Reset form
+    $('systemSalesAmount').value = '';
+    $('cashCountAmount').value = '';
+    $('cashCountNote').value = '';
+    $('reasonsList').innerHTML = '';
+    updateLiveDifference();
+    await refreshDashboardOnly();
+    showAlert('Saved successfully!', 'success');
+    
+  } catch(e) {
+    showAlert(e.message, 'error');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function refreshDashboardOnly() {
+  try {
+    const date = $('workDate').value;
+    const data = await apiCall('getDashboard', { date, system:'CASHIER' }, true, 'Refreshing...');
+    renderDashboard(data.dashboard || {});
+    showAlert('Dashboard updated', 'success');
+  } catch(e) { showAlert(e.message, 'error'); }
+}
+
+async function saveDeposit() {
+  const btn = $('saveDepositBtn');
+  btn.disabled = true;
+  try {
+    const date = $('workDate').value;
+    const office = parseMoney($('depositOffice').value);
+    const director = parseMoney($('depositDirector').value);
+    const note = $('depositNote').value.trim();
+    if (!date) throw new Error('Chagua tarehe');
+    if (office <= 0 && director <= 0) throw new Error('Weka kiasi');
+    
+    const transactions = [];
+    if (office > 0) transactions.push({ date, type:'DEPOSIT', category:'Bank Deposit', amount:office, source:'OFFICE', note, cashier:currentUser?.username });
+    if (director > 0) transactions.push({ date, type:'DEPOSIT', category:'Bank Deposit', amount:director, source:'DIRECTOR', note, cashier:currentUser?.username });
+    
+    await apiCall('addBulkTx', { transactions: JSON.stringify(transactions) }, true, 'Saving deposit...');
+    $('depositOffice').value = ''; $('depositDirector').value = ''; $('depositNote').value = '';
+    await refreshDashboardOnly();
+    showAlert('Deposit saved', 'success');
+  } catch(e) { showAlert(e.message, 'error'); }
+  finally { btn.disabled = false; }
+}
+
+async function searchTransactions() {
+  try {
+    const data = await apiCall('searchTransactions', {
+      fromDate: $('searchDateFrom').value,
+      toDate: $('searchDateTo').value,
+      type: $('searchType').value,
+      system: 'CASHIER'
+    }, true, 'Searching...');
+    
+    let rows = data.transactions || [];
+    rows = rows.filter(r => ['CASH_COUNT','CASH_REASON','DEPOSIT'].includes(r.type));
+    
+    const tbody = $('searchResultsBody');
+    let total = 0;
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Hakuna matokeo</td></tr>';
+      $('searchSummary').textContent = 'Jumla: TZS 0';
       return;
     }
     
-    try {
-      const dashData = await apiCall('getDashboard', { date }, false);
-      const dash = dashData.dashboard || {};
-      const txData = await apiCall('searchTransactions', { fromDate: date, toDate: date, type: 'POCKET_TOPUP', source: '', category: '', system: 'POCKET' }, false);
-      const topups = (txData?.transactions || []).reduce((sum, t) => sum + (t.amount || 0), 0);
-      const fullData = { dash, topups };
-      dashboardCache.data = fullData;
-      dashboardCache.timestamp = now;
-      renderDashboard(fullData);
-    } catch(e) { console.warn(e); }
-  }
+    tbody.innerHTML = rows.map(t => {
+      total += t.amount || 0;
+      return `<tr><td>${t.date}</td><td>${t.type}</td><td>${t.category || '-'}</td><td style="text-align:right;">TZS ${formatNumber(t.amount)}</td><td>${t.source || '-'}</td><td>${(t.note || '-').substring(0,50)}</td></tr>`;
+    }).join('');
+    $('searchSummary').textContent = `Jumla: TZS ${formatNumber(total)}`;
+    showAlert('Search complete', 'success');
+  } catch(e) { showAlert(e.message, 'error'); }
+}
 
-  function renderDashboard(data) {
-    const dash = data.dash;
-    document.getElementById('dashSystemSales').innerText = 'TZS ' + formatNumber(dash.systemSales || 0);
-    document.getElementById('dashCashCounted').innerText = 'TZS ' + formatNumber(dash.cashCounted || 0);
-    document.getElementById('dashDifference').innerText = 'TZS ' + formatNumber(dash.difference || 0);
-    document.getElementById('dashPendingDeposit').innerText = 'TZS ' + formatNumber(dash.pendingDeposit || 0);
-    document.getElementById('dashDirectorDebt').innerText = 'TZS ' + formatNumber(dash.directorDebt || 0);
-    document.getElementById('dashRemainingOffice').innerText = 'TZS ' + formatNumber(dash.officeExpected || 0);
-    document.getElementById('pocketBalance').innerText = 'TZS ' + formatNumber(dash.pocketClosing || 0);
-    document.getElementById('pocketTodayExpenses').innerText = 'TZS ' + formatNumber(dash.totalExpenses || 0);
-    document.getElementById('pocketTopupsTotal').innerText = 'TZS ' + formatNumber(data.topups || 0);
+async function login() {
+  const username = $('username').value.trim().toLowerCase();
+  const password = $('password').value;
+  if (!username || !password) return showAlert('Weka username na password', 'error', 'login');
+  try {
+    const data = await apiCall('login', { username, password, system:'CASHIER' }, false, 'Logging in...');
+    sessionToken = data.token;
+    currentUser = data.user;
+    $('userDisplay').textContent = `${currentUser.name || currentUser.username} (Cashier)`;
+    $('loginScreen').classList.add('hidden');
+    $('mainScreen').classList.remove('hidden');
+    $('workDate').value = todayISO();
+    $('searchDateFrom').value = todayISO();
+    $('searchDateTo').value = todayISO();
+    await loadInit($('workDate').value);
+    showAlert(`Welcome ${currentUser.name}!`, 'success');
+  } catch(e) {
+    showAlert('Invalid credentials', 'error', 'login');
   }
+}
 
-  async function loadInitData() {
-    try {
-      const date = document.getElementById('workDate').value;
-      const data = await apiCall('getInit', { date }, false);
-      categoriesList = data.categories || ["Ambulance","Chakula","Eye","Physiotherapy","Nauli","Waybill","Umeme","Internet"];
-      employeesList = data.employees || [];
-      const catSelect = document.getElementById('pocketExpenseCategory');
-      if(catSelect) { catSelect.innerHTML = '<option value="">Select</option>'; categoriesList.forEach(c => { const opt = document.createElement('option'); opt.value = c; opt.textContent = c; catSelect.appendChild(opt); }); }
-      const loanSel = document.getElementById('loanEmployee');
-      if(loanSel) { loanSel.innerHTML = '<option value="">Select</option>'; employeesList.forEach(emp => { const opt = document.createElement('option'); opt.value = emp; opt.textContent = emp; loanSel.appendChild(opt); }); }
-      await refreshAllDashboards();
-    } catch(e) { showAlert('Load error: '+e.message, 'error'); }
-  }
+function logout() { location.reload(); }
 
-  // ========== COLLECTION FUNCTIONS ==========
-  let pendingExpenses = [];
-  window.removeExpense = function(idx) { pendingExpenses.splice(idx,1); renderExpenseList(); };
-  function renderExpenseList() {
-    const container = document.getElementById('expenseListContainer');
-    const listEl = document.getElementById('expenseList');
-    const totalEl = document.getElementById('expenseListTotal');
-    const saveBtn = document.getElementById('saveAllExpensesBtn');
-    if(pendingExpenses.length===0) { if(container) container.classList.add('hidden'); if(saveBtn) saveBtn.disabled=true; return; }
-    if(container) container.classList.remove('hidden');
-    if(saveBtn) saveBtn.disabled=false;
-    let html='', total=0;
-    pendingExpenses.forEach((exp,i)=>{ total+=exp.amount; html+=`<div class="expense-item"><div class="expense-details"><div class="expense-category">${exp.category}</div><div class="expense-meta">${exp.note||''}</div></div><div class="expense-amount">TZS ${formatNumber(exp.amount)}</div><button class="remove-expense" onclick="removeExpense(${i})">✕</button></div>`; });
-    if(listEl) listEl.innerHTML=html;
-    if(totalEl) totalEl.innerText='TZS '+formatNumber(total);
-  }
-  function addExpenseToList() {
-    const category = document.getElementById('pocketExpenseCategory')?.value;
-    const amount = parseMoney(document.getElementById('pocketExpenseAmount')?.value);
-    const source = document.getElementById('pocketExpenseSource')?.value;
-    const note = document.getElementById('pocketExpenseNote')?.value.trim();
-    if(!category) return showAlert('Select category', 'error');
-    if(!amount || amount<=0) return showAlert('Enter amount', 'error');
-    pendingExpenses.push({ category, amount, source, note });
-    if(document.getElementById('pocketExpenseAmount')) document.getElementById('pocketExpenseAmount').value = '';
-    if(document.getElementById('pocketExpenseNote')) document.getElementById('pocketExpenseNote').value = '';
-    renderExpenseList(); showAlert('Added to list', 'success');
-  }
-  async function saveAllExpenses() {
-    if(pendingExpenses.length===0) return;
-    const date = document.getElementById('workDate').value;
-    if(!date) return showAlert('Select date','error');
-    const transactions = pendingExpenses.map(exp => ({ date, type:'EXPENSE', category:exp.category, amount:exp.amount, source:exp.source, note:exp.note, cashier:currentUser?.username, ref:makeRef() }));
-    try { await addBulkTx(transactions); pendingExpenses=[]; renderExpenseList(); showAlert(`Saved ${transactions.length} expenses`,'success'); dashboardCache.timestamp=0; await refreshAllDashboards(); } catch(e){ showAlert(e.message,'error'); }
-  }
-  function collectReasonsFromUI() { const out=[]; document.querySelectorAll('#reasonsList .reason-row').forEach(row=>{ const type=row.querySelector('.reasonType')?.value, other=row.querySelector('.reasonOther')?.value, amt=parseMoney(row.querySelector('.reasonAmount')?.value); if(type && amt>0) out.push({ reason: type==='Other'?other:type, amount:amt }); }); return out; }
-  function addReasonRow() { const container=document.getElementById('reasonsList'); if(!container) return; const row=document.createElement('div'); row.className='reason-row'; row.innerHTML=`<select class="reasonType"><option value="">Select</option><option value="Lipa Mpesa">Lipa Mpesa</option><option value="Other">Other</option></select><input class="reasonOther" placeholder="Reason"><input class="reasonAmount" placeholder="Amount"><button class="secondary-btn removeReasonBtn">✕</button>`; const amtInp=row.querySelector('.reasonAmount'); if(amtInp) amtInp.addEventListener('input',()=>{ const d=digitsOnly(amtInp.value); amtInp.value=d?Number(d).toLocaleString('en-US'):'';}); row.querySelector('.removeReasonBtn').onclick=()=>row.remove(); container.appendChild(row); }
-  async function saveCashAndSales() {
-    const date=document.getElementById('workDate').value, sys=parseMoney(document.getElementById('systemSalesAmount')?.value), cash=parseMoney(document.getElementById('cashCountAmount')?.value), note=document.getElementById('cashCountNote')?.value.trim()||'';
-    if(!date||sys<=0||cash<=0) return showAlert('Fill all fields','error');
-    const diff=cash-sys, shortageAbs=Math.abs(diff);
-    const transactions=[{ date, type:'SYSTEM_SALES', category:'System Sales', amount:sys, source:'SYSTEM', note, cashier:currentUser?.username, ref:makeRef() }, { date, type:'CASH_COUNT', category:'Cash Count', amount:cash, source:'OFFICE', note, cashier:currentUser?.username, ref:makeRef() }];
-    if(diff<0 && shortageAbs>=1000){
-      const reasons=collectReasonsFromUI(); const explained=reasons.reduce((s,r)=>s+r.amount,0);
-      if(explained<shortageAbs && (shortageAbs-explained)>=1000) return showAlert(`Shortage not fully explained: TZS ${formatNumber(shortageAbs-explained)}`, 'error');
-      reasons.forEach(r=>transactions.push({ date, type:'CASH_REASON', category:r.reason, amount:r.amount, source:'REASON', note:'shortage', cashier:currentUser?.username, ref:makeRef() }));
-    }
-    try { await addBulkTx(transactions); if(document.getElementById('systemSalesAmount')) document.getElementById('systemSalesAmount').value=''; if(document.getElementById('cashCountAmount')) document.getElementById('cashCountAmount').value=''; if(document.getElementById('cashCountNote')) document.getElementById('cashCountNote').value=''; const reasonsDiv=document.getElementById('reasonsList'); if(reasonsDiv) reasonsDiv.innerHTML=''; showAlert('Saved','success'); dashboardCache.timestamp=0; await refreshAllDashboards(); } catch(e){ showAlert(e.message,'error'); }
-  }
-  async function saveDeposit() { const date=document.getElementById('workDate').value, amount=parseMoney(document.getElementById('depositAmount')?.value), note=document.getElementById('depositNote')?.value.trim()||''; if(!date||amount<=0) return showAlert('Enter amount','error'); await addTx(date,'DEPOSIT','Bank Deposit',amount,'OFFICE',note); if(document.getElementById('depositAmount')) document.getElementById('depositAmount').value=''; if(document.getElementById('depositNote')) document.getElementById('depositNote').value=''; showAlert('Deposit saved','success'); dashboardCache.timestamp=0; await refreshAllDashboards(); }
-  async function saveLoan() { const date=document.getElementById('workDate').value, emp=document.getElementById('loanEmployee')?.value, amount=parseMoney(document.getElementById('loanAmount')?.value), reason=document.getElementById('loanReason')?.value.trim()||''; if(!date||!emp||amount<=0) return showAlert('Fill all fields','error'); await addTx(date,'EMPLOYEE_LOAN_REQUEST',emp,amount,'LOAN',reason); if(document.getElementById('loanAmount')) document.getElementById('loanAmount').value=''; if(document.getElementById('loanReason')) document.getElementById('loanReason').value=''; showAlert('Loan saved','success'); dashboardCache.timestamp=0; await refreshAllDashboards(); }
-  async function searchTransactions() { const from=document.getElementById('searchDateFrom')?.value, to=document.getElementById('searchDateTo')?.value, type=document.getElementById('searchType')?.value; try{ const data=await apiCall('searchTransactions', { fromDate:from, toDate:to, type, source:'', category:'', system:'' }, true); let results=data.transactions||[]; const role=(currentUser?.role||'').toLowerCase(); const username=currentUser?.username; if(role==='cashier') results=results.filter(t=>['SYSTEM_SALES','CASH_COUNT','CASH_REASON','DEPOSIT','EMPLOYEE_LOAN_REQUEST'].includes(t.type) && t.cashier===username); if(role==='treasurer') results=results.filter(t=>['EXPENSE','POCKET_TOPUP'].includes(t.type) && t.cashier===username); let html='',total=0; results.forEach(t=>{ total+=t.amount; html+=`<tr><td style="padding:8px;">${t.date}</td><td>${t.type}</td><td style="text-align:right;">TZS ${formatNumber(t.amount)}</td><td>${t.note||t.category||'-'}</td><td>${t.cashier||'-'}</td>`; }); const tbody=document.getElementById('searchResultsBody'); if(tbody) tbody.innerHTML=html||'<tr><td colspan="5">No results</td></tr>'; const totalDiv=document.getElementById('searchTotal'); if(totalDiv) totalDiv.innerHTML=`Total: TZS ${formatNumber(total)}`; } catch(e){ showAlert(e.message,'error'); } }
-  function exportCSV() { const rows=document.querySelectorAll('#searchResultsBody tr'); if(rows.length<2) return; let csv='Date,Type,Amount,Note,Cashier\n'; rows.forEach(r=>{ const cells=r.querySelectorAll('td'); if(cells.length>=4) csv+=`"${cells[0].innerText}","${cells[1].innerText}","${cells[2].innerText.replace('TZS ','')}","${cells[3].innerText}","${cells[4]?.innerText||''}"\n`; }); const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download=`transactions_${new Date().toISOString().slice(0,10)}.csv`; a.click(); }
-  async function savePocketTopup() { const date=document.getElementById('workDate').value, source=document.getElementById('pocketSource')?.value, amount=parseMoney(document.getElementById('pocketTopupAmount')?.value), note=document.getElementById('pocketTopupNote')?.value.trim()||''; if(!date||amount<=0) return showAlert('Enter amount','error'); await addTx(date,'POCKET_TOPUP', (source==='DIRECTOR'?'Director':'Sales'), amount, source, note); if(document.getElementById('pocketTopupAmount')) document.getElementById('pocketTopupAmount').value=''; if(document.getElementById('pocketTopupNote')) document.getElementById('pocketTopupNote').value=''; showAlert('Top-up saved','success'); dashboardCache.timestamp=0; await refreshAllDashboards(); }
-  async function searchPocketTransactions() { const from=document.getElementById('pocketSearchFrom')?.value, to=document.getElementById('pocketSearchTo')?.value; try{ const data=await apiCall('searchTransactions', { fromDate:from, toDate:to, type:'', source:'', category:'', system:'' }, true); let results=data.transactions||[]; const role=(currentUser?.role||'').toLowerCase(); const username=currentUser?.username; if(role==='cashier') results=results.filter(t=>['SYSTEM_SALES','CASH_COUNT','CASH_REASON','DEPOSIT','EMPLOYEE_LOAN_REQUEST'].includes(t.type) && t.cashier===username); if(role==='treasurer') results=results.filter(t=>['EXPENSE','POCKET_TOPUP'].includes(t.type) && t.cashier===username); let html='',total=0; results.forEach(t=>{ total+=t.amount; html+=`<tr><td style="padding:8px;">${t.date}</td><td>${t.type}</td><td style="text-align:right;">TZS ${formatNumber(t.amount)}</td><td>${t.source||'-'}</td><td>${t.note||t.category||'-'}</td>`; }); const tbody=document.getElementById('pocketSearchBody'); if(tbody) tbody.innerHTML=html||'<tr><td colspan="5">No results</td></tr>'; const totalDiv=document.getElementById('pocketSearchTotal'); if(totalDiv) totalDiv.innerHTML=`Total: TZS ${formatNumber(total)}`; } catch(e){ showAlert(e.message,'error'); } }
-
-  // ========== UI SETUP ==========
-  let currentAccessType = null;
-  function setupUIByRole(roleFromSheet) {
-    const access = (roleFromSheet || "").toLowerCase() === 'treasurer' ? 'treasurer' : ((roleFromSheet || "").toLowerCase() === 'admin' ? 'admin' : 'cashier');
-    currentAccessType = access;
-    document.getElementById('userRoleBadge').innerHTML = `🔹 ${roleFromSheet || 'Cashier'}`;
-    document.getElementById('collectionSection').classList.add('hidden');
-    document.getElementById('pocketSection').classList.add('hidden');
-    document.getElementById('roleSelector').style.display = 'none';
-    document.getElementById('roleInfoBanner').classList.add('hidden');
-    if(access === 'cashier') {
-      document.getElementById('collectionSection').classList.remove('hidden');
-      document.getElementById('roleInfoBanner').classList.remove('hidden');
-      document.getElementById('roleInfoBanner').innerHTML = '📍 You are logged in as <strong>Cashier</strong> — Access: Collection Desk';
-    } else if(access === 'treasurer') {
-      document.getElementById('pocketSection').classList.remove('hidden');
-      document.getElementById('roleInfoBanner').classList.remove('hidden');
-      document.getElementById('roleInfoBanner').innerHTML = '📍 You are logged in as <strong>Treasurer</strong> — Access: Pocket Money';
-    } else if(access === 'admin') {
-      document.getElementById('roleSelector').style.display = 'flex';
-      document.getElementById('collectionSection').classList.remove('hidden');
-      document.querySelectorAll('[data-role]').forEach(tab => tab.classList.remove('active'));
-      if(document.querySelector('[data-role="collection"]')) document.querySelector('[data-role="collection"]').classList.add('active');
-    }
-  }
-
-  function setRole(role) { if(currentAccessType !== 'admin') return; document.getElementById('collectionSection').classList.toggle('hidden', role !== 'collection'); document.getElementById('pocketSection').classList.toggle('hidden', role !== 'pocket'); document.querySelectorAll('[data-role]').forEach(tab => tab.classList.toggle('active', tab.getAttribute('data-role') === role)); }
-  function setCollectionTab(tabId) { document.querySelectorAll('[data-collection-tab]').forEach(t=>t.classList.remove('active')); const activeTab = document.querySelector(`[data-collection-tab="${tabId}"]`); if(activeTab) activeTab.classList.add('active'); document.getElementById('salesTab')?.classList.add('hidden'); document.getElementById('depositTab')?.classList.add('hidden'); document.getElementById('loanTab')?.classList.add('hidden'); document.getElementById('searchTab')?.classList.add('hidden'); document.getElementById(tabId)?.classList.remove('hidden'); }
-  function setPocketTab(tabId) { document.querySelectorAll('[data-pocket-tab]').forEach(t=>t.classList.remove('active')); const activeTab = document.querySelector(`[data-pocket-tab="${tabId}"]`); if(activeTab) activeTab.classList.add('active'); document.getElementById('expenseTab')?.classList.add('hidden'); document.getElementById('topupTab')?.classList.add('hidden'); document.getElementById('pocketSearchTab')?.classList.add('hidden'); document.getElementById(tabId)?.classList.remove('hidden'); }
-
-  async function login() {
-    const u = document.getElementById('username').value.trim().toLowerCase();
-    const p = document.getElementById('password').value;
-    if(!u || !p) { showAlert('Enter username and password', 'error', 'login'); return; }
-    setOverlay(true);
-    try {
-      const data = await apiCall('login', { username: u, password: p }, false);
-      if(!data || !data.success) throw new Error('Login failed');
-      sessionToken = data.token;
-      currentUser = data.user;
-      const userRole = currentUser.role || "Cashier";
-      document.getElementById('userDisplay').innerText = `${currentUser.name} (${currentUser.role})`;
-      document.getElementById('loginScreen').classList.add('hidden');
-      document.getElementById('mainScreen').classList.remove('hidden');
-      // Set today's date automatically (fixes the previous day bug)
-      setTodayDate();
-      await loadInitData();
-      setupUIByRole(userRole);
-      showAlert(`Welcome ${currentUser.name}!`, 'success');
-    } catch(e) { showAlert('Invalid username or password', 'error', 'login'); }
-    setOverlay(false);
-  }
-  function logout() { location.reload(); }
-
-  document.addEventListener('DOMContentLoaded',()=>{
-    attachMoney('systemSalesAmount'); attachMoney('cashCountAmount'); attachMoney('depositAmount'); attachMoney('loanAmount'); attachMoney('pocketExpenseAmount'); attachMoney('pocketTopupAmount');
-    // Set today's date on page load
-    setTodayDate();
-    
-    const sysInput = document.getElementById('systemSalesAmount');
-    const cashInput = document.getElementById('cashCountAmount');
-    if(sysInput && cashInput) {
-      const updateDiff = () => { const s=parseMoney(sysInput.value), c=parseMoney(cashInput.value); document.getElementById('liveDiff').innerHTML='TZS '+formatNumber(c-s); const panel=document.getElementById('reasonsPanel'); if(c-s<0 && Math.abs(c-s)>=1000) panel?.classList.remove('hidden'); else panel?.classList.add('hidden'); };
-      sysInput.addEventListener('input', updateDiff);
-      cashInput.addEventListener('input', updateDiff);
-    }
-    document.getElementById('addReasonBtn')?.addEventListener('click', addReasonRow);
-    document.getElementById('saveCashSalesBtn')?.addEventListener('click', saveCashAndSales);
-    document.getElementById('saveDepositBtn')?.addEventListener('click', saveDeposit);
-    document.getElementById('saveLoanBtn')?.addEventListener('click', saveLoan);
-    document.getElementById('searchBtn')?.addEventListener('click', searchTransactions);
-    document.getElementById('exportSearchBtn')?.addEventListener('click', exportCSV);
-    document.getElementById('refreshBtn')?.addEventListener('click', () => { dashboardCache.timestamp=0; refreshAllDashboards(); });
-    document.getElementById('workDate')?.addEventListener('change', () => { dashboardCache.timestamp=0; refreshAllDashboards(); });
-    document.getElementById('loginBtn')?.addEventListener('click', login);
-    document.getElementById('logoutBtn')?.addEventListener('click', logout);
-    document.querySelectorAll('[data-role]').forEach(btn=>btn.addEventListener('click',()=>setRole(btn.getAttribute('data-role'))));
-    document.querySelectorAll('[data-collection-tab]').forEach(btn=>btn.addEventListener('click',()=>setCollectionTab(btn.getAttribute('data-collection-tab'))));
-    document.querySelectorAll('[data-pocket-tab]').forEach(btn=>btn.addEventListener('click',()=>setPocketTab(btn.getAttribute('data-pocket-tab'))));
-    document.getElementById('addExpenseToListBtn')?.addEventListener('click', addExpenseToList);
-    document.getElementById('saveAllExpensesBtn')?.addEventListener('click', saveAllExpenses);
-    document.getElementById('savePocketTopupBtn')?.addEventListener('click', savePocketTopup);
-    document.getElementById('pocketSearchBtn')?.addEventListener('click', searchPocketTransactions);
-    setCollectionTab('salesTab'); setPocketTab('expenseTab');
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+  $('workDate').value = todayISO();
+  $('searchDateFrom').value = todayISO();
+  $('searchDateTo').value = todayISO();
+  
+  $('loginBtn').addEventListener('click', login);
+  $('logoutBtn')?.addEventListener('click', logout);
+  $('refreshBtn').addEventListener('click', refreshDashboardOnly);
+  $('tabCashCount').addEventListener('click', () => setActiveTab('CashCount'));
+  $('tabDeposit').addEventListener('click', () => setActiveTab('Deposit'));
+  $('tabSearch').addEventListener('click', () => setActiveTab('Search'));
+  $('addReasonBtn').addEventListener('click', addReasonRow);
+  $('saveCashAndSalesBtn').addEventListener('click', saveCashAndSales);
+  $('saveDepositBtn').addEventListener('click', saveDeposit);
+  $('searchBtn').addEventListener('click', searchTransactions);
+  
+  // Live update on input
+  $('systemSalesAmount').addEventListener('input', updateLiveDifference);
+  $('cashCountAmount').addEventListener('input', updateLiveDifference);
+  
+  // Money formatting
+  ['systemSalesAmount','cashCountAmount','depositOffice','depositDirector'].forEach(id => {
+    const el = $(id);
+    if (el) el.addEventListener('input', () => { let v = parseMoney(el.value); el.value = v ? formatNumber(v) : ''; });
   });
+  
+  updateLiveDifference();
+});
 </script>
 </body>
 </html>
