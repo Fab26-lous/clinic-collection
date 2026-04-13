@@ -143,6 +143,18 @@
   border: 1px solid #e2e8f0;
   background: white;
 }
+  .newPersonForm {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  background: #f0f4fa;
+  padding: 8px;
+  border-radius: 8px;
+}
+.newPersonForm input {
+  margin-bottom: 0 !important;
+  padding: 8px !important;
+}
   </style>
 </head>
 <body>
@@ -268,13 +280,13 @@
           <h4 style="color:#10b981;">👥 Wateja Tunaowadai (Debtors)</h4>
           <div class="row"><div><label>Jina la Mteja</label><input type="text" id="newDebtorName"></div><div><label>Kiasi Anachodai (TZS)</label><input type="text" id="newDebtorAmount"></div></div>
           <div class="row"><div><label>Maelezo</label><input type="text" id="newDebtorNote"></div><div><button class="primary-btn" id="addDebtorBtn" style="background:#10b981;">➕ Ongeza Mteja</button></div></div>
-          <table><thead><tr><th>Jina</th><th>Anadaiwa</th><th>Ameshalipa</th><th>Salio</th><th>Kitendo</th></tr></thead><tbody id="debtorsTableBody"></tbody></table>
+          <table><thead><tr><th>Jina</th><th>Anadaiwa</th><th>Ameshalipa</th><th>Balance</th><th>Action</th></tr></thead><tbody id="debtorsTableBody"></tbody></table>
         </div>
         <div class="section-card" style="border-left-color:#b02a37; margin-top:20px;">
           <h4 style="color:#b02a37;">🏢 Wanatudai (Creditors)</h4>
           <div class="row"><div><label>Jina la Mdai</label><input type="text" id="newCreditorName"></div><div><label>Kiasi Tunachodaiwa (TZS)</label><input type="text" id="newCreditorAmount"></div></div>
           <div class="row"><div><label>Maelezo</label><input type="text" id="newCreditorNote"></div><div><button class="primary-btn" id="addCreditorBtn" style="background:#b02a37;">➕ Ongeza Mdai</button></div></div>
-          <table><thead><tr><th>Jina</th><th>Tunadaiwa</th><th>Tumeshalipa</th><th>Salio</th><th>Kitendo</th></tr></thead><tbody id="creditorsTableBody"></tbody></table>
+          <table><thead><tr><th>Jina</th><th>Tunadaiwa</th><th>Tumeshalipa</th><th>Balance</th><th>Action</th></tr></thead><tbody id="creditorsTableBody"></tbody></table>
         </div>
       </div>
     </div>
@@ -325,12 +337,23 @@
     <select class="reasonType">
       <option value="">Chagua Sababu</option>
       <option value="Lipa Mpesa">💸 Lipa Mpesa</option>
-      <option value="Debtor">👤 Mteja Anadai (Debtor)</option>
+      <option value="Debtor">👤 Mteja Tunamdai (Debtor)</option>
       <option value="Creditor">🏢 Tunadaiwa (Creditor)</option>
       <option value="Other">📝 Nyingine</option>
     </select>
     <input type="text" class="reasonOther" placeholder="Andika sababu" style="display:none;">
-    <select class="reasonPersonName" style="display:none;"><option value="">Chagua jina...</option></select>
+    <select class="reasonPersonName" style="display:none;">
+      <option value="">Chagua jina...</option>
+      <option value="__ADD_NEW_DEBTOR__">➕ Ongeza Mteja Mpya...</option>
+      <option value="__ADD_NEW_CREDITOR__">➕ Ongeza Mdai Mpya...</option>
+    </select>
+    <!-- Inline form for adding new person (hidden by default) -->
+    <div class="newPersonForm" style="display:none; flex:2; display:flex; gap:5px; align-items:center;">
+      <input type="text" class="newPersonName" placeholder="Jina" style="width:40%;">
+      <input type="text" class="newPersonAmount" placeholder="Kiasi (TZS)" style="width:30%;">
+      <button type="button" class="secondary-btn saveNewPersonBtn" style="padding:8px 10px;">Save</button>
+      <button type="button" class="secondary-btn cancelNewPersonBtn" style="padding:8px 10px;">Cancel</button>
+    </div>
     <input type="text" class="reasonAmount" placeholder="Kiasi (TZS)">
     <button type="button" class="secondary-btn removeReasonBtn">✕</button>
   </div>
@@ -488,34 +511,144 @@
     }
   }
 
-  function addReasonRow() {
-    const container = document.getElementById('reasonsList');
-    const clone = document.getElementById('reasonTemplate').content.cloneNode(true);
-    const row = clone.querySelector('.reason-row');
-    const typeSel = row.querySelector('.reasonType');
-    const otherInp = row.querySelector('.reasonOther');
-    const personSel = row.querySelector('.reasonPersonName');
-    const amtInp = row.querySelector('.reasonAmount');
-    const removeBtn = row.querySelector('.removeReasonBtn');
-    function updatePersonOptions() {
-      personSel.innerHTML = '<option value="">Chagua jina...</option>';
-      globalDebtors.forEach(d => { const o = document.createElement('option'); o.value = `DEBTOR:${d.name}`; o.textContent = `💰 ${d.name} (anadai ${formatNumber(d.remaining)})`; personSel.appendChild(o); });
-      globalCreditors.forEach(c => { const o = document.createElement('option'); o.value = `CREDITOR:${c.name}`; o.textContent = `💳 ${c.name} (tunadaiwa ${formatNumber(c.remaining)})`; personSel.appendChild(o); });
-    }
-    updatePersonOptions();
-    amtInp.addEventListener('input', ()=>{ fmtInput(amtInp); calcDiffUI(); });
-    typeSel.addEventListener('change', ()=>{
-      const v = typeSel.value;
-      otherInp.style.display = v==='Other'?'block':'none';
-      personSel.style.display = (v==='Debtor'||v==='Creditor')?'block':'none';
-      calcDiffUI();
+function addReasonRow() {
+  const container = document.getElementById('reasonsList');
+  const clone = document.getElementById('reasonTemplate').content.cloneNode(true);
+  const row = clone.querySelector('.reason-row');
+  const typeSel = row.querySelector('.reasonType');
+  const otherInp = row.querySelector('.reasonOther');
+  const personSel = row.querySelector('.reasonPersonName');
+  const amtInp = row.querySelector('.reasonAmount');
+  const removeBtn = row.querySelector('.removeReasonBtn');
+  const newPersonForm = row.querySelector('.newPersonForm');
+  const newPersonName = row.querySelector('.newPersonName');
+  const newPersonAmount = row.querySelector('.newPersonAmount');
+  const saveNewBtn = row.querySelector('.saveNewPersonBtn');
+  const cancelNewBtn = row.querySelector('.cancelNewPersonBtn');
+
+  // Populate the person dropdown with existing debtors/creditors
+  function populatePersonOptions() {
+    personSel.innerHTML = '<option value="">Chagua jina...</option>';
+    // Add existing debtors
+    globalDebtors.forEach(d => {
+      const opt = document.createElement('option');
+      opt.value = `DEBTOR:${d.name}`;
+      opt.textContent = `💰 ${d.name} (anadai ${formatNumber(d.remaining)})`;
+      personSel.appendChild(opt);
     });
-    otherInp.addEventListener('input', calcDiffUI);
-    personSel.addEventListener('change', calcDiffUI);
-    removeBtn.addEventListener('click', ()=>{ row.remove(); calcDiffUI(); });
-    container.appendChild(row);
-    calcDiffUI();
+    // Add existing creditors
+    globalCreditors.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = `CREDITOR:${c.name}`;
+      opt.textContent = `💳 ${c.name} (tunadaiwa ${formatNumber(c.remaining)})`;
+      personSel.appendChild(opt);
+    });
+    // Add "Add New" options
+    const addDebtorOpt = document.createElement('option');
+    addDebtorOpt.value = '__ADD_NEW_DEBTOR__';
+    addDebtorOpt.textContent = '➕ Ongeza Mteja Mpya...';
+    personSel.appendChild(addDebtorOpt);
+    const addCreditorOpt = document.createElement('option');
+    addCreditorOpt.value = '__ADD_NEW_CREDITOR__';
+    addCreditorOpt.textContent = '➕ Ongeza Mdai Mpya...';
+    personSel.appendChild(addCreditorOpt);
   }
+  populatePersonOptions();
+
+  // Helper to refresh the dropdown after adding a new person
+  async function refreshPersonDropdown() {
+    // Reload global lists
+    try {
+      const data = await apiCall('getInit', { date: document.getElementById('workDate').value });
+      globalDebtors = data.debtors || [];
+      globalCreditors = data.creditors || [];
+    } catch (e) { console.warn(e); }
+    populatePersonOptions();
+  }
+
+  // Show/hide elements based on reason type selection
+  typeSel.addEventListener('change', () => {
+    const val = typeSel.value;
+    otherInp.style.display = val === 'Other' ? 'block' : 'none';
+    const showPerson = (val === 'Debtor' || val === 'Creditor');
+    personSel.style.display = showPerson ? 'block' : 'none';
+    newPersonForm.style.display = 'none';
+    calcDiffUI();
+  });
+
+  // When person selection changes
+  personSel.addEventListener('change', () => {
+    const val = personSel.value;
+    if (val === '__ADD_NEW_DEBTOR__' || val === '__ADD_NEW_CREDITOR__') {
+      // Show inline form
+      newPersonForm.style.display = 'flex';
+      personSel.style.display = 'none';
+      // Pre-fill type hint
+      newPersonName.placeholder = val === '__ADD_NEW_DEBTOR__' ? 'Jina la Mteja' : 'Jina la Mdai';
+    } else {
+      newPersonForm.style.display = 'none';
+      personSel.style.display = 'block';
+      calcDiffUI();
+    }
+  });
+
+  // Cancel adding new person
+  cancelNewBtn.addEventListener('click', () => {
+    newPersonForm.style.display = 'none';
+    personSel.style.display = 'block';
+    personSel.value = '';
+    newPersonName.value = '';
+    newPersonAmount.value = '';
+  });
+
+  // Save new person
+  saveNewBtn.addEventListener('click', async () => {
+    const isDebtor = personSel.value === '__ADD_NEW_DEBTOR__';
+    const isCreditor = personSel.value === '__ADD_NEW_CREDITOR__';
+    const name = newPersonName.value.trim();
+    const amount = parseMoney(newPersonAmount.value);
+    if (!name || amount <= 0) {
+      showAlert('Weka jina na kiasi halali', 'error');
+      return;
+    }
+    setOverlay(true);
+    try {
+      if (isDebtor) {
+        await apiCall('addDebtor', { name, amount, note: 'Added from cash reason' });
+      } else if (isCreditor) {
+        await apiCall('addCreditor', { name, amount, note: 'Added from cash reason' });
+      }
+      showAlert(`${isDebtor ? 'Mteja' : 'Mdai'} ameongezwa`, 'success');
+      // Refresh dropdown
+      await refreshPersonDropdown();
+      // Hide form, show select, and select the newly added person
+      newPersonForm.style.display = 'none';
+      personSel.style.display = 'block';
+      // Find and select the new person
+      const prefix = isDebtor ? 'DEBTOR:' : 'CREDITOR:';
+      for (let i = 0; i < personSel.options.length; i++) {
+        if (personSel.options[i].value === prefix + name) {
+          personSel.selectedIndex = i;
+          break;
+        }
+      }
+      newPersonName.value = '';
+      newPersonAmount.value = '';
+      calcDiffUI();
+    } catch (e) {
+      showAlert('Imeshindwa kuongeza: ' + e.message, 'error');
+    } finally {
+      setOverlay(false);
+    }
+  });
+
+  amtInp.addEventListener('input', () => { fmtInput(amtInp); calcDiffUI(); });
+  otherInp.addEventListener('input', calcDiffUI);
+  removeBtn.addEventListener('click', () => { row.remove(); calcDiffUI(); });
+
+  container.appendChild(row);
+  calcDiffUI();
+}
 
   async function saveCashAndSales() {
     const btn = document.getElementById('saveCashSalesBtn'); btn.disabled = true;
