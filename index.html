@@ -60,7 +60,7 @@
       .tabs { flex-direction:column; }
       .stat-value, .stat-value-green, .stat-value-red, .stat-value-orange { font-size:1.5rem; }
     }
-    /* Debtors & Creditors Tables */
+/* ===== IMPROVED TABLE STYLES FOR DEBTORS/CREDITORS ===== */
 #debtorsTab table, #creditorsTableBody table {
   width: 100%;
   border-collapse: collapse;
@@ -77,10 +77,31 @@
   color: white;
   font-weight: 700;
   padding: 14px 10px;
-  text-align: left;
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+/* Name column (left) */
+#debtorsTab th:first-child, #creditorsTableBody th:first-child,
+#debtorsTab td:first-child, #creditorsTableBody td:first-child {
+  text-align: left;
+}
+
+/* Amount columns (right) */
+#debtorsTab th:nth-child(2), #debtorsTab th:nth-child(3), #debtorsTab th:nth-child(4),
+#creditorsTableBody th:nth-child(2), #creditorsTableBody th:nth-child(3), #creditorsTableBody th:nth-child(4),
+#debtorsTab td:nth-child(2), #debtorsTab td:nth-child(3), #debtorsTab td:nth-child(4),
+#creditorsTableBody td:nth-child(2), #creditorsTableBody td:nth-child(3), #creditorsTableBody td:nth-child(4) {
+  text-align: right;
+  padding-right: 20px;
+}
+
+/* Action column (center) */
+#debtorsTab th:last-child, #creditorsTableBody th:last-child,
+#debtorsTab td:last-child, #creditorsTableBody td:last-child {
+  text-align: center;
+  white-space: nowrap;
 }
 
 #debtorsTab td, #creditorsTableBody td {
@@ -91,15 +112,6 @@
 
 #debtorsTab tbody tr:hover, #creditorsTableBody tbody tr:hover {
   background-color: #f8fafd;
-}
-
-#debtorsTab td:last-child, #creditorsTableBody td:last-child {
-  text-align: center;
-  white-space: nowrap;
-}
-
-#debtorsTab td:not(:last-child), #creditorsTableBody td:not(:last-child) {
-  text-align: left;
 }
 
 #debtorsTab .payDebtorBtn, #creditorsTableBody .payCreditorBtn {
@@ -126,7 +138,6 @@
   background: #9b1f2c;
 }
 
-/* Make table scrollable on small screens */
 #debtorsTab div[style*="max-height"] {
   border-radius: 12px;
   border: 1px solid #e2e8f0;
@@ -190,7 +201,7 @@
         <div class="tab" data-collection-tab="depositTab">2. Bank Deposit</div>
         <div class="tab" data-collection-tab="loanTab">3. Employee Loan</div>
         <div class="tab" data-collection-tab="searchTab">4. Search</div>
-        <div class="tab" data-collection-tab="debtorsTab">5. 📋 Wateja/Wadai</div>
+        <div class="tab" data-collection-tab="debtorsTab">5. 📋 Debtors/Creditors</div>
       </div>
 
       <!-- Sales Tab -->
@@ -409,7 +420,7 @@
     if(dtbody) {
       if(!globalDebtors.length) dtbody.innerHTML='<tr><td colspan="5">No debtors</td></tr>';
       else {
-        dtbody.innerHTML = globalDebtors.map(d=>`<tr><td>${d.name}</td><td style="text-align:right;">${formatNumber(d.amountOwed)}</td><td style="text-align:right;">${formatNumber(d.amountPaid||0)}</td><td style="text-align:right;">${formatNumber(d.remaining)}</td><td><button class="secondary-btn payDebtorBtn" data-name="${d.name}" data-remaining="${d.remaining}">💰 Pay</button></td></tr>`).join('');
+        dtbody.innerHTML = globalDebtors.map(d=>`<tr><td>${d.name}</td><td style="text-align:right;">${formatNumber(d.amountOwed)}</td><td style="text-align:right;">${formatNumber(d.amountPaid||0)}</td><td style="text-align:right;">${formatNumber(d.remaining)}</td><td><button class="secondary-btn payDebtorBtn" data-name="${d.name}" data-remaining="${d.remaining}">💰 Amelipa</button></td></tr>`).join('');
         document.querySelectorAll('.payDebtorBtn').forEach(b=>b.addEventListener('click',()=>recordDebtorPayment(b.dataset.name, b.dataset.remaining)));
       }
     }
