@@ -205,8 +205,18 @@
         <div class="tab" data-pocket-tab="directorPaymentsTab">👤 Director Payments</div>
         <div class="tab" data-pocket-tab="pocketSearchTab">🔍 Search</div>
       </div>
-      <div id="expenseTab" class="card"><!-- expense form unchanged --></div>
-      <div id="topupTab" class="card hidden"><!-- topup form unchanged --></div>
+      <div id="expenseTab" class="card">
+        <h3>Record Matumizi</h3>
+        <div class="row"><div><label>Category</label><select id="pocketExpenseCategory"><option value="">Select</option></select></div><div><label>Amount (TZS)</label><input type="text" id="pocketExpenseAmount"></div></div>
+        <div class="row"><div><label>Payment From</label><select id="pocketExpenseSource"><option value="POCKET">💰 Pocket</option><option value="SALES">📊 Mauzo</option><option value="DIRECTOR">👤 Director</option></select></div><div><label>Note</label><input type="text" id="pocketExpenseNote"></div></div>
+        <div class="row"><button class="secondary-btn" id="addExpenseToListBtn">➕ Add to List</button><button class="primary-btn" id="saveAllExpensesBtn" disabled>💾 Save All</button></div>
+        <div id="expenseListContainer" class="hidden"><div class="expense-list" id="expenseList"></div><div class="expense-total"><span>Total:</span><span id="expenseListTotal">TZS 0</span></div></div>
+      </div>
+      <div id="topupTab" class="card hidden">
+        <h3>Pocket Top-up</h3>
+        <div class="row"><div><label>From</label><select id="pocketSource"><option value="SALES">💰 From Sales</option><option value="DIRECTOR">👤 Director</option></select></div><div><label>Amount (TZS)</label><input type="text" id="pocketTopupAmount"></div></div>
+        <label>Note</label><input type="text" id="pocketTopupNote"><button class="primary-btn" id="savePocketTopupBtn">Save</button>
+      </div>
       <div id="directorPaymentsTab" class="card hidden">
         <h3>👤 Director Payments (Expenses Paid by Director)</h3>
         <p style="margin-bottom:16px; color:#6c757d;">Record expenses that the director paid directly (does NOT reduce pocket balance).</p>
@@ -217,7 +227,12 @@
         <label>Note</label><input type="text" id="directorExpenseNote">
         <button class="primary-btn" id="saveDirectorExpenseBtn">Save Director Payment</button>
       </div>
-      <div id="pocketSearchTab" class="card hidden"><h3>🔍 Search</h3></div>
+      <div id="pocketSearchTab" class="card hidden">
+        <h3>🔍 Pocket Transactions</h3>
+        <div class="row"><div><label>From</label><input type="date" id="pocketSearchFrom"></div><div><label>To</label><input type="date" id="pocketSearchTo"></div></div>
+        <button class="primary-btn" id="pocketSearchBtn">Search</button>
+        <div id="pocketSearchResults"><table><thead><tr><th>Date</th><th>Type</th><th>Amount</th><th>Note</th></tr></thead><tbody id="pocketSearchBody"></tbody></table></div>
+      </div>
     </div>
   </div>
 </div>
@@ -244,7 +259,6 @@
   let pendingExpenses = [];
   let globalDebtors = [], globalCreditors = [];
 
-  // Helper functions (same as before)
   function setOverlay(s) { document.getElementById('loadingOverlay').classList.toggle('show', s); }
   function parseMoney(v) { const d = String(v||'').replace(/\D/g,''); return d ? Number(d) : 0; }
   function formatNumber(n) { return n.toLocaleString(); }
@@ -262,9 +276,11 @@
       if(sessionToken) payload.token = sessionToken;
       const body = new URLSearchParams({ action, ...payload });
       const res = await fetch(SCRIPT_URL, { method:'POST', body });
-      const data = await res.json();
+      const text = await res.text();
+      let data;
+      try { data = JSON.parse(text); } catch(e) { throw new Error('Invalid response'); }
       if(data.needLogin) { showAlert('Session expired','error'); logout(); return null; }
-      if(!data.success) throw new Error(data.error);
+      if(!data.success) throw new Error(data.error||'Request failed');
       return data;
     } catch(e) { throw e; } finally { if(showLoader) setOverlay(false); }
   }
@@ -297,9 +313,401 @@
     } catch(e) { console.warn(e); }
   }
 
-  // ... rest of the JavaScript (loadInitData, renderDebtorsCreditors, save functions, etc.) ...
-  // (Due to length, I'm summarizing; the full code is available in the previous complete answer)
-  // Please refer to the previous message for the complete JavaScript section.
+  async function loadInitData() {
+    try {
+      const date = document.getElementById('workDate').value;
+      const data = await apiCall('getInit', { date });
+      categoriesList = data.categories || [];
+      employeesList = data.employees || [];
+      globalDebtors = data.debtors || [];
+      globalCreditors = data.creditors || [];
+      const catSel = document.getElementById('pocketExpenseCategory');
+      if(catSel){ catSel.innerHTML='<option value="">Select</option>'; categoriesList.forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; catSel.appendChild(o); }); }
+      const dirCatSel = document.getElementById('directorExpenseCategory');
+      if(dirCatSel){ dirCatSel.innerHTML='<option value="">Select</option>'; categoriesList.forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; dirCatSel.appendChild(o); }); }
+      const loanSel = document.getElementById('loanEmployee');
+      if(loanSel){ loanSel.innerHTML='<option value="">Select</option>'; employeesList.forEach(e=>{ const o=document.createElement('option'); o.value=e; o.textContent=e; loanSel.appendChild(o); }); }
+      renderDebtorsCreditors();
+      await refreshAllDashboards();
+    } catch(e) { showAlert('Load error: '+e.message,'error'); }
+  }
+
+  function renderDebtorsCreditors() {
+    const dtbody = document.getElementById('debtorsTableBody');
+    if(dtbody) {
+      if(!globalDebtors.length) dtbody.innerHTML='<tr><td colspan="5">No debtors</td></tr>';
+      else {
+        dtbody.innerHTML = globalDebtors.map(d=>`<tr><td>${d.name}</td><td style="text-align:right;">${formatNumber(d.amountOwed)}</td><td style="text-align:right;">${formatNumber(d.amountPaid||0)}</td><td style="text-align:right;">${formatNumber(d.remaining)}</td><td><button class="secondary-btn payDebtorBtn" data-name="${d.name}" data-remaining="${d.remaining}">💰 Pay</button></td></tr>`).join('');
+        document.querySelectorAll('.payDebtorBtn').forEach(b=>b.addEventListener('click',()=>recordDebtorPayment(b.dataset.name, b.dataset.remaining)));
+      }
+    }
+    const ctbody = document.getElementById('creditorsTableBody');
+    if(ctbody) {
+      if(!globalCreditors.length) ctbody.innerHTML='<tr><td colspan="5">No creditors</td></tr>';
+      else {
+        ctbody.innerHTML = globalCreditors.map(c=>`<tr><td>${c.name}</td><td style="text-align:right;">${formatNumber(c.amountOwed)}</td><td style="text-align:right;">${formatNumber(c.amountPaid||0)}</td><td style="text-align:right;">${formatNumber(c.remaining)}</td><td><button class="secondary-btn payCreditorBtn" data-name="${c.name}" data-remaining="${c.remaining}">💸 Pay</button></td></tr>`).join('');
+        document.querySelectorAll('.payCreditorBtn').forEach(b=>b.addEventListener('click',()=>recordCreditorPayment(b.dataset.name, b.dataset.remaining)));
+      }
+    }
+  }
+
+  async function recordDebtorPayment(name, remaining) {
+    const amt = prompt(`Enter payment from ${name} (Remaining: ${formatNumber(remaining)})`);
+    if(!amt) return;
+    const pay = parseMoney(amt);
+    if(pay<=0 || pay>remaining) return showAlert('Invalid amount','error');
+    const note = prompt('Note (optional):',`Payment from ${name}`);
+    try {
+      await apiCall('recordDebtorPayment', { debtorName:name, amount:pay, note, date:document.getElementById('workDate').value }, true);
+      showAlert('Payment recorded','success');
+      await loadInitData();
+    } catch(e) { showAlert(e.message,'error'); }
+  }
+
+  async function recordCreditorPayment(name, remaining) {
+    const amt = prompt(`Enter payment to ${name} (Remaining: ${formatNumber(remaining)})`);
+    if(!amt) return;
+    const pay = parseMoney(amt);
+    if(pay<=0 || pay>remaining) return showAlert('Invalid amount','error');
+    const note = prompt('Note (optional):',`Payment to ${name}`);
+    try {
+      await apiCall('recordCreditorPayment', { creditorName:name, amount:pay, note, date:document.getElementById('workDate').value }, true);
+      showAlert('Payment recorded','success');
+      await loadInitData();
+    } catch(e) { showAlert(e.message,'error'); }
+  }
+
+  function reasonsTotal() {
+    let sum = 0;
+    document.querySelectorAll('#reasonsList .reason-row').forEach(r=>{ const amt=r.querySelector('.reasonAmount'); if(amt) sum+=parseMoney(amt.value)||0; });
+    return sum;
+  }
+  function calcDiffUI() {
+    const sys = parseMoney(document.getElementById('systemSalesAmount').value);
+    const cash = parseMoney(document.getElementById('cashCountAmount').value);
+    const diff = cash - sys;
+    document.getElementById('cashVsSalesDiff').innerText = 'TZS ' + formatNumber(diff);
+    const reasonsBox = document.getElementById('reasonsBox');
+    const shortageText = document.getElementById('shortageRemainingText');
+    if(sys>0 && cash>0 && diff<0 && Math.abs(diff)>=1000) {
+      reasonsBox.classList.remove('hidden');
+      if(!document.querySelectorAll('#reasonsList .reason-row').length) addReasonRow();
+      shortageText.style.display='block';
+    } else {
+      reasonsBox.classList.add('hidden');
+      shortageText.style.display='none';
+    }
+    const explained = reasonsTotal();
+    const remaining = (diff<0 && Math.abs(diff)>=1000) ? Math.max(0, Math.abs(diff)-explained) : 0;
+    if(diff<0 && Math.abs(diff)>=1000) {
+      if(explained >= Math.abs(diff)) shortageText.innerHTML = `✅ Upungufu umeelezwa (Sababu: TZS ${formatNumber(explained)})`;
+      else shortageText.innerHTML = `⚠️ Upungufu BADO: TZS ${formatNumber(remaining)} (ongeza sababu)`;
+    }
+  }
+
+  function addReasonRow() {
+    const container = document.getElementById('reasonsList');
+    const clone = document.getElementById('reasonTemplate').content.cloneNode(true);
+    const row = clone.querySelector('.reason-row');
+    const typeSel = row.querySelector('.reasonType');
+    const otherInp = row.querySelector('.reasonOther');
+    const personSel = row.querySelector('.reasonPersonName');
+    const amtInp = row.querySelector('.reasonAmount');
+    const removeBtn = row.querySelector('.removeReasonBtn');
+    function updatePersonOptions() {
+      personSel.innerHTML = '<option value="">Chagua jina...</option>';
+      globalDebtors.forEach(d => { const o = document.createElement('option'); o.value = `DEBTOR:${d.name}`; o.textContent = `💰 ${d.name} (anadai ${formatNumber(d.remaining)})`; personSel.appendChild(o); });
+      globalCreditors.forEach(c => { const o = document.createElement('option'); o.value = `CREDITOR:${c.name}`; o.textContent = `💳 ${c.name} (tunadaiwa ${formatNumber(c.remaining)})`; personSel.appendChild(o); });
+    }
+    updatePersonOptions();
+    amtInp.addEventListener('input', ()=>{ fmtInput(amtInp); calcDiffUI(); });
+    typeSel.addEventListener('change', ()=>{
+      const v = typeSel.value;
+      otherInp.style.display = v==='Other'?'block':'none';
+      personSel.style.display = (v==='Debtor'||v==='Creditor')?'block':'none';
+      calcDiffUI();
+    });
+    otherInp.addEventListener('input', calcDiffUI);
+    personSel.addEventListener('change', calcDiffUI);
+    removeBtn.addEventListener('click', ()=>{ row.remove(); calcDiffUI(); });
+    container.appendChild(row);
+    calcDiffUI();
+  }
+
+  async function saveCashAndSales() {
+    const btn = document.getElementById('saveCashSalesBtn'); btn.disabled = true;
+    try {
+      const date = document.getElementById('workDate').value;
+      const sys = parseMoney(document.getElementById('systemSalesAmount').value);
+      const cash = parseMoney(document.getElementById('cashCountAmount').value);
+      const note = document.getElementById('cashCountNote').value.trim();
+      if(!date||!sys||!cash) throw new Error('Fill all fields');
+      const diff = cash - sys;
+      const transactions = [
+        { date, type:'SYSTEM_SALES', category:'System Sales', amount:sys, source:'SYSTEM', note, cashier:currentUser.username, ref:makeRef() },
+        { date, type:'CASH_COUNT', category:'Cash Count', amount:cash, source:'OFFICE', note, cashier:currentUser.username, ref:makeRef() }
+      ];
+      if(diff < 0 && Math.abs(diff) >= 1000) {
+        const reasons = [];
+        document.querySelectorAll('#reasonsList .reason-row').forEach(r => {
+          const type = r.querySelector('.reasonType').value;
+          const amount = parseMoney(r.querySelector('.reasonAmount').value);
+          if(!type||amount<=0) return;
+          let category = '', source = 'REASON', desc = '';
+          if(type==='Lipa Mpesa') { category = 'Lipa Mpesa'; desc = 'Lipa Mpesa'; }
+          else if(type==='Other') { category = r.querySelector('.reasonOther').value.trim(); if(!category) throw new Error('Other requires description'); desc = category; }
+          else if(type==='Debtor') {
+            const val = r.querySelector('.reasonPersonName').value;
+            if(!val) throw new Error('Select debtor');
+            const name = val.split(':')[1];
+            category = `Debtor: ${name}`; source = 'DEBTOR'; desc = `Debtor ${name} took cash`;
+            apiCall('processCashReasonDebtorCreditor', { reasonType:'DEBTOR', name, amount, date });
+          }
+          else if(type==='Creditor') {
+            const val = r.querySelector('.reasonPersonName').value;
+            if(!val) throw new Error('Select creditor');
+            const name = val.split(':')[1];
+            category = `Creditor: ${name}`; source = 'CREDITOR'; desc = `Paid to creditor ${name}`;
+            apiCall('processCashReasonDebtorCreditor', { reasonType:'CREDITOR', name, amount, date });
+          }
+          transactions.push({ date, type:'CASH_REASON', category, amount, source, note:desc, cashier:currentUser.username, ref:makeRef() });
+        });
+      }
+      await addBulkTx(transactions);
+      document.getElementById('systemSalesAmount').value = '';
+      document.getElementById('cashCountAmount').value = '';
+      document.getElementById('cashCountNote').value = '';
+      document.getElementById('reasonsList').innerHTML = '';
+      calcDiffUI();
+      await refreshAllDashboards();
+      showAlert('Saved','success');
+    } catch(e) { showAlert(e.message,'error'); } finally { btn.disabled = false; }
+  }
+
+  async function saveDeposit() {
+    const date = document.getElementById('workDate').value;
+    const amt = parseMoney(document.getElementById('depositAmount').value);
+    const note = document.getElementById('depositNote').value.trim();
+    if(!date||amt<=0) return showAlert('Enter amount','error');
+    await addTx(date, 'DEPOSIT', 'Bank Deposit', amt, 'OFFICE', note);
+    document.getElementById('depositAmount').value = '';
+    document.getElementById('depositNote').value = '';
+    showAlert('Deposit saved','success');
+    await refreshAllDashboards();
+  }
+
+  async function saveLoan() {
+    const date = document.getElementById('workDate').value;
+    const emp = document.getElementById('loanEmployee').value;
+    const amt = parseMoney(document.getElementById('loanAmount').value);
+    const reason = document.getElementById('loanReason').value.trim();
+    if(!date||!emp||amt<=0) return showAlert('Fill all fields','error');
+    await addTx(date, 'EMPLOYEE_LOAN_REQUEST', emp, amt, 'LOAN', reason);
+    document.getElementById('loanAmount').value = '';
+    document.getElementById('loanReason').value = '';
+    showAlert('Loan saved','success');
+    await refreshAllDashboards();
+  }
+
+  async function saveCashToDirector() {
+    const date = document.getElementById('workDate').value;
+    const amt = parseMoney(document.getElementById('cashToDirectorAmount').value);
+    const note = document.getElementById('cashToDirectorNote').value.trim();
+    if(!date||amt<=0) return showAlert('Enter amount','error');
+    await apiCall('addCashToDirector', { date, amount:amt, note }, true);
+    document.getElementById('cashToDirectorAmount').value = '';
+    document.getElementById('cashToDirectorNote').value = '';
+    showAlert('Cash to director recorded','success');
+    await refreshAllDashboards();
+  }
+
+  async function saveDirectorExpense() {
+    const date = document.getElementById('workDate').value;
+    const cat = document.getElementById('directorExpenseCategory').value;
+    const amt = parseMoney(document.getElementById('directorExpenseAmount').value);
+    const note = document.getElementById('directorExpenseNote').value.trim();
+    if(!date||!cat||amt<=0) return showAlert('Fill all fields','error');
+    await addTx(date, 'EXPENSE', cat, amt, 'DIRECTOR', note);
+    document.getElementById('directorExpenseAmount').value = '';
+    document.getElementById('directorExpenseNote').value = '';
+    showAlert('Director payment saved','success');
+    await refreshAllDashboards();
+  }
+
+  function addExpenseToList() {
+    const cat = document.getElementById('pocketExpenseCategory').value;
+    const amt = parseMoney(document.getElementById('pocketExpenseAmount').value);
+    const src = document.getElementById('pocketExpenseSource').value;
+    const note = document.getElementById('pocketExpenseNote').value.trim();
+    if(!cat||!amt) return showAlert('Select category and amount','error');
+    pendingExpenses.push({ category:cat, amount:amt, source:src, note });
+    document.getElementById('pocketExpenseAmount').value = '';
+    document.getElementById('pocketExpenseNote').value = '';
+    renderExpenseList();
+    showAlert('Added','success');
+  }
+
+  function renderExpenseList() {
+    const container = document.getElementById('expenseListContainer');
+    const listEl = document.getElementById('expenseList');
+    const totalEl = document.getElementById('expenseListTotal');
+    const saveBtn = document.getElementById('saveAllExpensesBtn');
+    if(!pendingExpenses.length) {
+      container.classList.add('hidden');
+      saveBtn.disabled = true;
+      return;
+    }
+    container.classList.remove('hidden');
+    saveBtn.disabled = false;
+    let html = '', total = 0;
+    pendingExpenses.forEach((e,i) => {
+      total += e.amount;
+      html += `<div class="expense-item"><div class="expense-details"><div class="expense-category">${e.category}</div><div>${e.note||''}</div></div><div class="expense-amount">TZS ${formatNumber(e.amount)}</div><button class="remove-expense" onclick="window.removeExpense(${i})">✕</button></div>`;
+    });
+    listEl.innerHTML = html;
+    totalEl.innerText = 'TZS ' + formatNumber(total);
+  }
+  window.removeExpense = function(idx) { pendingExpenses.splice(idx,1); renderExpenseList(); };
+
+  async function saveAllExpenses() {
+    if(!pendingExpenses.length) return;
+    const date = document.getElementById('workDate').value;
+    if(!date) return showAlert('Select date','error');
+    const transactions = pendingExpenses.map(e => ({
+      date, type:'EXPENSE', category:e.category, amount:e.amount, source:e.source, note:e.note, cashier:currentUser.username, ref:makeRef()
+    }));
+    try {
+      await addBulkTx(transactions);
+      pendingExpenses = [];
+      renderExpenseList();
+      showAlert(`Saved ${transactions.length} expenses`,'success');
+      await refreshAllDashboards();
+    } catch(e) { showAlert(e.message,'error'); }
+  }
+
+  async function savePocketTopup() {
+    const date = document.getElementById('workDate').value;
+    const src = document.getElementById('pocketSource').value;
+    const amt = parseMoney(document.getElementById('pocketTopupAmount').value);
+    const note = document.getElementById('pocketTopupNote').value.trim();
+    if(!date||amt<=0) return showAlert('Enter amount','error');
+    await addTx(date, 'POCKET_TOPUP', (src==='DIRECTOR'?'Director':'Sales'), amt, src, note);
+    document.getElementById('pocketTopupAmount').value = '';
+    document.getElementById('pocketTopupNote').value = '';
+    showAlert('Top-up saved','success');
+    await refreshAllDashboards();
+  }
+
+  let currentAccessType = null;
+  function setupUIByRole(role) {
+    const access = role.toLowerCase()==='treasurer'?'treasurer':(role.toLowerCase()==='admin'?'admin':'cashier');
+    currentAccessType = access;
+    document.getElementById('userRoleBadge').innerHTML = `🔹 ${role||'Cashier'}`;
+    document.getElementById('collectionSection').classList.add('hidden');
+    document.getElementById('pocketSection').classList.add('hidden');
+    document.getElementById('roleSelector').style.display = 'none';
+    if(access==='cashier') {
+      document.getElementById('collectionSection').classList.remove('hidden');
+    } else if(access==='treasurer') {
+      document.getElementById('pocketSection').classList.remove('hidden');
+    } else if(access==='admin') {
+      document.getElementById('roleSelector').style.display = 'flex';
+      document.getElementById('collectionSection').classList.remove('hidden');
+      document.querySelector('[data-role="collection"]').classList.add('active');
+    }
+  }
+  function setRole(role) {
+    if(currentAccessType!=='admin') return;
+    document.getElementById('collectionSection').classList.toggle('hidden', role!=='collection');
+    document.getElementById('pocketSection').classList.toggle('hidden', role!=='pocket');
+    document.querySelectorAll('[data-role]').forEach(t=>t.classList.toggle('active', t.getAttribute('data-role')===role));
+  }
+  function setCollectionTab(tabId) {
+    document.querySelectorAll('[data-collection-tab]').forEach(t=>t.classList.remove('active'));
+    document.querySelector(`[data-collection-tab="${tabId}"]`)?.classList.add('active');
+    ['salesTab','depositTab','loanTab','searchTab','debtorsTab'].forEach(id=>document.getElementById(id)?.classList.add('hidden'));
+    document.getElementById(tabId)?.classList.remove('hidden');
+    if(tabId==='debtorsTab') loadInitData();
+  }
+  function setPocketTab(tabId) {
+    document.querySelectorAll('[data-pocket-tab]').forEach(t=>t.classList.remove('active'));
+    document.querySelector(`[data-pocket-tab="${tabId}"]`)?.classList.add('active');
+    ['expenseTab','topupTab','directorPaymentsTab','pocketSearchTab'].forEach(id=>document.getElementById(id)?.classList.add('hidden'));
+    document.getElementById(tabId)?.classList.remove('hidden');
+  }
+
+  async function login() {
+    const u = document.getElementById('username').value.trim().toLowerCase();
+    const p = document.getElementById('password').value;
+    if(!u||!p) return showAlert('Enter credentials','error','login');
+    setOverlay(true);
+    try {
+      const data = await apiCall('login', {username:u, password:p});
+      if(!data||!data.success) throw new Error('Login failed');
+      sessionToken = data.token;
+      currentUser = data.user;
+      document.getElementById('userDisplay').innerText = `${currentUser.name} (${currentUser.role})`;
+      document.getElementById('loginScreen').classList.add('hidden');
+      document.getElementById('mainScreen').classList.remove('hidden');
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('workDate').value = today;
+      await loadInitData();
+      setupUIByRole(currentUser.role);
+      showAlert(`Welcome ${currentUser.name}!`,'success');
+    } catch(e) { showAlert('Invalid credentials','error','login'); }
+    setOverlay(false);
+  }
+  function logout() { location.reload(); }
+
+  document.addEventListener('DOMContentLoaded', ()=>{
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('workDate').value = today;
+    ['systemSalesAmount','cashCountAmount','depositAmount','loanAmount','cashToDirectorAmount','pocketExpenseAmount','pocketTopupAmount','directorExpenseAmount'].forEach(attachMoney);
+    document.getElementById('systemSalesAmount').addEventListener('input', calcDiffUI);
+    document.getElementById('cashCountAmount').addEventListener('input', calcDiffUI);
+    document.getElementById('addReasonBtn').addEventListener('click', addReasonRow);
+    document.getElementById('saveCashSalesBtn').addEventListener('click', saveCashAndSales);
+    document.getElementById('saveDepositBtn').addEventListener('click', saveDeposit);
+    document.getElementById('saveLoanBtn').addEventListener('click', saveLoan);
+    document.getElementById('saveCashToDirectorBtn').addEventListener('click', saveCashToDirector);
+    document.getElementById('saveDirectorExpenseBtn').addEventListener('click', saveDirectorExpense);
+    document.getElementById('refreshBtn').addEventListener('click', refreshAllDashboards);
+    document.getElementById('workDate').addEventListener('change', refreshAllDashboards);
+    document.getElementById('loginBtn').addEventListener('click', login);
+    document.getElementById('logoutBtn').addEventListener('click', logout);
+    document.querySelectorAll('[data-role]').forEach(btn=>btn.addEventListener('click', ()=>setRole(btn.getAttribute('data-role'))));
+    document.querySelectorAll('[data-collection-tab]').forEach(btn=>btn.addEventListener('click', ()=>setCollectionTab(btn.getAttribute('data-collection-tab'))));
+    document.querySelectorAll('[data-pocket-tab]').forEach(btn=>btn.addEventListener('click', ()=>setPocketTab(btn.getAttribute('data-pocket-tab'))));
+    document.getElementById('addExpenseToListBtn').addEventListener('click', addExpenseToList);
+    document.getElementById('saveAllExpensesBtn').addEventListener('click', saveAllExpenses);
+    document.getElementById('savePocketTopupBtn').addEventListener('click', savePocketTopup);
+    document.getElementById('addDebtorBtn').addEventListener('click', async ()=>{
+      const name = document.getElementById('newDebtorName').value.trim();
+      const amt = parseMoney(document.getElementById('newDebtorAmount').value);
+      const note = document.getElementById('newDebtorNote').value.trim();
+      if(!name||amt<=0) return showAlert('Enter name and amount','error');
+      await apiCall('addDebtor', {name, amount:amt, note}, true);
+      document.getElementById('newDebtorName').value = '';
+      document.getElementById('newDebtorAmount').value = '';
+      document.getElementById('newDebtorNote').value = '';
+      showAlert('Debtor added','success');
+      await loadInitData();
+    });
+    document.getElementById('addCreditorBtn').addEventListener('click', async ()=>{
+      const name = document.getElementById('newCreditorName').value.trim();
+      const amt = parseMoney(document.getElementById('newCreditorAmount').value);
+      const note = document.getElementById('newCreditorNote').value.trim();
+      if(!name||amt<=0) return showAlert('Enter name and amount','error');
+      await apiCall('addCreditor', {name, amount:amt, note}, true);
+      document.getElementById('newCreditorName').value = '';
+      document.getElementById('newCreditorAmount').value = '';
+      document.getElementById('newCreditorNote').value = '';
+      showAlert('Creditor added','success');
+      await loadInitData();
+    });
+    setCollectionTab('salesTab');
+    setPocketTab('expenseTab');
+  });
 </script>
 </body>
 </html>
