@@ -60,6 +60,78 @@
       .tabs { flex-direction:column; }
       .stat-value, .stat-value-green, .stat-value-red, .stat-value-orange { font-size:1.5rem; }
     }
+    /* Debtors & Creditors Tables */
+#debtorsTab table, #creditorsTableBody table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 0.9rem;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+
+#debtorsTab th, #creditorsTableBody th {
+  background: #1e3a5f;
+  color: white;
+  font-weight: 700;
+  padding: 14px 10px;
+  text-align: left;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+#debtorsTab td, #creditorsTableBody td {
+  padding: 14px 10px;
+  border-bottom: 1px solid #edf2f7;
+  vertical-align: middle;
+}
+
+#debtorsTab tbody tr:hover, #creditorsTableBody tbody tr:hover {
+  background-color: #f8fafd;
+}
+
+#debtorsTab td:last-child, #creditorsTableBody td:last-child {
+  text-align: center;
+  white-space: nowrap;
+}
+
+#debtorsTab td:not(:last-child), #creditorsTableBody td:not(:last-child) {
+  text-align: left;
+}
+
+#debtorsTab .payDebtorBtn, #creditorsTableBody .payCreditorBtn {
+  background: #10b981;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 30px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#debtorsTab .payCreditorBtn {
+  background: #b02a37;
+}
+
+#debtorsTab .payDebtorBtn:hover {
+  background: #059669;
+}
+
+#debtorsTab .payCreditorBtn:hover {
+  background: #9b1f2c;
+}
+
+/* Make table scrollable on small screens */
+#debtorsTab div[style*="max-height"] {
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: white;
+}
   </style>
 </head>
 <body>
@@ -180,15 +252,15 @@
 
       <!-- Debtors/Creditors Tab (Swahili) -->
       <div id="debtorsTab" class="card hidden">
-        <h3>📋 Wateja na Watunadai</h3>
+        <h3>📋 Debtors/Creditors</h3>
         <div class="section-card" style="border-left-color:#10b981;">
-          <h4 style="color:#10b981;">👥 Wateja Wanaodai (Debtors)</h4>
+          <h4 style="color:#10b981;">👥 Wateja Tunaowadai (Debtors)</h4>
           <div class="row"><div><label>Jina la Mteja</label><input type="text" id="newDebtorName"></div><div><label>Kiasi Anachodai (TZS)</label><input type="text" id="newDebtorAmount"></div></div>
           <div class="row"><div><label>Maelezo</label><input type="text" id="newDebtorNote"></div><div><button class="primary-btn" id="addDebtorBtn" style="background:#10b981;">➕ Ongeza Mteja</button></div></div>
           <table><thead><tr><th>Jina</th><th>Anadaiwa</th><th>Ameshalipa</th><th>Salio</th><th>Kitendo</th></tr></thead><tbody id="debtorsTableBody"></tbody></table>
         </div>
         <div class="section-card" style="border-left-color:#b02a37; margin-top:20px;">
-          <h4 style="color:#b02a37;">🏢 Tunawadai (Creditors)</h4>
+          <h4 style="color:#b02a37;">🏢 Wanatudai (Creditors)</h4>
           <div class="row"><div><label>Jina la Mdai</label><input type="text" id="newCreditorName"></div><div><label>Kiasi Tunachodaiwa (TZS)</label><input type="text" id="newCreditorAmount"></div></div>
           <div class="row"><div><label>Maelezo</label><input type="text" id="newCreditorNote"></div><div><button class="primary-btn" id="addCreditorBtn" style="background:#b02a37;">➕ Ongeza Mdai</button></div></div>
           <table><thead><tr><th>Jina</th><th>Tunadaiwa</th><th>Tumeshalipa</th><th>Salio</th><th>Kitendo</th></tr></thead><tbody id="creditorsTableBody"></tbody></table>
