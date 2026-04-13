@@ -337,7 +337,7 @@
     <select class="reasonType">
       <option value="">Chagua Sababu</option>
       <option value="Lipa Mpesa">💸 Lipa Mpesa</option>
-      <option value="Debtor">👤 Mteja Tunamdai (Debtor)</option>
+      <option value="Debtor">👤 Mteja Anadai (Debtor)</option>
       <option value="Creditor">🏢 Tunadaiwa (Creditor)</option>
       <option value="Other">📝 Nyingine</option>
     </select>
@@ -347,12 +347,11 @@
       <option value="__ADD_NEW_DEBTOR__">➕ Ongeza Mteja Mpya...</option>
       <option value="__ADD_NEW_CREDITOR__">➕ Ongeza Mdai Mpya...</option>
     </select>
-    <!-- Inline form for adding new person (hidden by default) -->
-    <div class="newPersonForm" style="display:none; flex:2; display:flex; gap:5px; align-items:center;">
-      <input type="text" class="newPersonName" placeholder="Jina" style="width:40%;">
-      <input type="text" class="newPersonAmount" placeholder="Kiasi (TZS)" style="width:30%;">
-      <button type="button" class="secondary-btn saveNewPersonBtn" style="padding:8px 10px;">Save</button>
-      <button type="button" class="secondary-btn cancelNewPersonBtn" style="padding:8px 10px;">Cancel</button>
+    <!-- Simplified inline form: only name -->
+    <div class="newPersonForm" style="display:none; flex:2; gap:5px; align-items:center;">
+      <input type="text" class="newPersonName" placeholder="Jina la mteja/mdai" style="flex:1;">
+      <button type="button" class="secondary-btn saveNewPersonBtn" style="padding:8px 12px;">Save</button>
+      <button type="button" class="secondary-btn cancelNewPersonBtn" style="padding:8px 12px;">Cancel</button>
     </div>
     <input type="text" class="reasonAmount" placeholder="Kiasi (TZS)">
     <button type="button" class="secondary-btn removeReasonBtn">✕</button>
@@ -522,7 +521,6 @@ function addReasonRow() {
   const removeBtn = row.querySelector('.removeReasonBtn');
   const newPersonForm = row.querySelector('.newPersonForm');
   const newPersonName = row.querySelector('.newPersonName');
-  const newPersonAmount = row.querySelector('.newPersonAmount');
   const saveNewBtn = row.querySelector('.saveNewPersonBtn');
   const cancelNewBtn = row.querySelector('.cancelNewPersonBtn');
 
@@ -601,46 +599,52 @@ function addReasonRow() {
     newPersonAmount.value = '';
   });
 
-  // Save new person
-  saveNewBtn.addEventListener('click', async () => {
-    const isDebtor = personSel.value === '__ADD_NEW_DEBTOR__';
-    const isCreditor = personSel.value === '__ADD_NEW_CREDITOR__';
-    const name = newPersonName.value.trim();
-    const amount = parseMoney(newPersonAmount.value);
-    if (!name || amount <= 0) {
-      showAlert('Weka jina na kiasi halali', 'error');
-      return;
+ // Save new person (using reason amount as initial balance)
+saveNewBtn.addEventListener('click', async () => {
+  const isDebtor = personSel.value === '__ADD_NEW_DEBTOR__';
+  const isCreditor = personSel.value === '__ADD_NEW_CREDITOR__';
+  const name = newPersonName.value.trim();
+  const amount = parseMoney(amtInp.value);  // Use the reason amount field
+
+  if (!name) {
+    showAlert('Weka jina', 'error');
+    return;
+  }
+  if (amount <= 0) {
+    showAlert('Weka kiasi kwenye "Kiasi (TZS)" kwanza', 'error');
+    return;
+  }
+
+  setOverlay(true);
+  try {
+    if (isDebtor) {
+      await apiCall('addDebtor', { name, amount, note: 'Added from cash reason' });
+    } else if (isCreditor) {
+      await apiCall('addCreditor', { name, amount, note: 'Added from cash reason' });
     }
-    setOverlay(true);
-    try {
-      if (isDebtor) {
-        await apiCall('addDebtor', { name, amount, note: 'Added from cash reason' });
-      } else if (isCreditor) {
-        await apiCall('addCreditor', { name, amount, note: 'Added from cash reason' });
+    showAlert(`${isDebtor ? 'Mteja' : 'Mdai'} ameongezwa`, 'success');
+
+    // Refresh dropdown
+    await refreshPersonDropdown();
+
+    // Hide form, show select, and select the new person
+    newPersonForm.style.display = 'none';
+    personSel.style.display = 'block';
+    const prefix = isDebtor ? 'DEBTOR:' : 'CREDITOR:';
+    for (let i = 0; i < personSel.options.length; i++) {
+      if (personSel.options[i].value === prefix + name) {
+        personSel.selectedIndex = i;
+        break;
       }
-      showAlert(`${isDebtor ? 'Mteja' : 'Mdai'} ameongezwa`, 'success');
-      // Refresh dropdown
-      await refreshPersonDropdown();
-      // Hide form, show select, and select the newly added person
-      newPersonForm.style.display = 'none';
-      personSel.style.display = 'block';
-      // Find and select the new person
-      const prefix = isDebtor ? 'DEBTOR:' : 'CREDITOR:';
-      for (let i = 0; i < personSel.options.length; i++) {
-        if (personSel.options[i].value === prefix + name) {
-          personSel.selectedIndex = i;
-          break;
-        }
-      }
-      newPersonName.value = '';
-      newPersonAmount.value = '';
-      calcDiffUI();
-    } catch (e) {
-      showAlert('Imeshindwa kuongeza: ' + e.message, 'error');
-    } finally {
-      setOverlay(false);
     }
-  });
+    newPersonName.value = '';
+    calcDiffUI();
+  } catch (e) {
+    showAlert('Imeshindwa kuongeza: ' + e.message, 'error');
+  } finally {
+    setOverlay(false);
+  }
+});
 
   amtInp.addEventListener('input', () => { fmtInput(amtInp); calcDiffUI(); });
   otherInp.addEventListener('input', calcDiffUI);
